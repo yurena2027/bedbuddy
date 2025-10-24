@@ -11,8 +11,9 @@ uri = os.getenv("MONGO_URI")
 client = MongoClient(uri, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 
 try:
-    print("Connected to MongoDB:", client.server_info()["version"])
-    print("Databases:", client.list_database_names())
+    client.admin.command("ping")
+    print("Connected to MongoDB:")
+    
 except Exception as e:
     print("Connection failed:", e)
 

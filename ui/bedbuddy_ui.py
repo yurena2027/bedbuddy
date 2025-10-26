@@ -1,48 +1,51 @@
 
-import tkinter as tk  # Import the main Tkinter library for creating GUI windows and widgets
-from tkinter import ttk, simpledialog, messagebox  # Import ttk for themed widgets, dialogs, and message boxes
+import tkinter as tk
+from tkinter import ttk, simpledialog, messagebox
 
-root = tk.Tk()  # Create the main application window
-root.title("Hospital Dashboard")  # Set the window title
-root.geometry("1400x450")  # Set the window size (width x height)
+root = tk.Tk()
+root.title("Hospital Dashboard")
+root.geometry("1500x450")
 
 # ---------------- Left Sidebar ---------------- #
-sidebar = tk.Frame(root, bg="lightgray", width=150)  # Sidebar frame on the left
-sidebar.pack(side="left", fill="y")  # Pack sidebar to left and fill vertically
+sidebar = tk.Frame(root, bg="lightgray", width=150)
+sidebar.pack(side="left", fill="y")
 
 # Sidebar Label
 myed_label = tk.Label(sidebar, text="ED Space", bg="lightgray", font=("Arial", 10, "bold"))
-myed_label.pack(anchor="w", padx=10, pady=(10, 0))  # Top-left label in sidebar
+myed_label.pack(anchor="w", padx=10, pady=(10, 0))
+
+# ---- Frame to hold bay buttons ---- #
+bay_buttons_frame = tk.Frame(sidebar, bg="lightgray")
+bay_buttons_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
 # ---------------- Patient View ---------------- #
-patient_frame = tk.Frame(root, bd=1, relief="solid")  # Frame for patient list
+patient_frame = tk.Frame(root, bd=1, relief="solid")
 patient_frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
 
 patient_label = tk.Label(patient_frame, text="Patient View", font=("Arial", 12, "bold"))
-patient_label.pack(anchor="w", padx=5, pady=5)  # Label at top-left of patient frame
+patient_label.pack(anchor="w", padx=5, pady=5)
 
-# Treeview for displaying patients
-columns = ("Name", "Location", "Patient Info")  # Define table columns
+columns = ("Name", "Location", "Patient Info")
 tree = ttk.Treeview(patient_frame, columns=columns, show="headings", height=10)
 
 for col in columns:
-    tree.heading(col, text=col)  # Set column headings
-    tree.column(col, anchor="center", width=150)  # Set column width and center alignment
+    tree.heading(col, text=col)
+    tree.column(col, anchor="center", width=150)
 
-tree.pack(fill="both", expand=True, padx=10, pady=10)  # Pack Treeview into patient frame
+tree.pack(fill="both", expand=True, padx=10, pady=10)
 
 # ---------------- Bay View ---------------- #
-bay_frame = tk.Frame(root, bd=1, relief="solid", width=300)  # Frame for Bay View
+bay_frame = tk.Frame(root, bd=1, relief="solid", width=250)
 bay_frame.pack(side="left", fill="both", padx=5, pady=5)
 
 bay_label = tk.Label(bay_frame, text="Bay View", font=("Arial", 12, "bold"))
-bay_label.pack(anchor="w", padx=5, pady=5)  # Label at top-left of bay frame
+bay_label.pack(anchor="w", padx=5, pady=5)
 
-beds_frame = tk.Frame(bay_frame, bg="lightgray")  # Frame to hold bed widgets
+beds_frame = tk.Frame(bay_frame, bg="lightgray")
 beds_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
 # ---------------- Data ---------------- #
-bay_beds = {  # Dictionary storing bay and bed information
+bay_beds = {
     1: [
         ("B1", "yellow", True, "John Green"),
         ("B2", "yellow", True, "Brandon Sanderson"),
@@ -58,70 +61,61 @@ bay_beds = {  # Dictionary storing bay and bed information
     ]
 }
 
-# ---------------- Global Variable ---------------- #
-selected_bed = None  # Track currently selected bed for highlight
-current_bay = 1      # Track currently displayed bay (None = all bays view)
+# ---------------- Global Variables ---------------- #
+selected_bed = None
+current_bay = 1
+MAX_BAYS = 3
+MAX_BEDS_PER_BAY = 6
 
 # ---------------- Functions ---------------- #
 def refresh_tree(bay_filter=None):
-    """Refresh the patient list in Treeview, optionally filtered by bay."""
-    for row in tree.get_children():  # Clear existing rows
+    for row in tree.get_children():
         tree.delete(row)
 
     if bay_filter is not None:
-        bays_to_show = [bay_filter]  # Single bay view
+        bays_to_show = [bay_filter]
     else:
-        bays_to_show = bay_beds.keys()  # All bays view
+        bays_to_show = bay_beds.keys()
 
     for bay_num in bays_to_show:
         for bedname, color, has_patient, pname in bay_beds[bay_num]:
             if has_patient:
-                location = f"Bay {bay_num} / {bedname}"  # Format location string
+                location = f"Bay {bay_num} / {bedname}"
                 tree.insert("", "end", values=(pname, location, "..."))
 
 def update_bed_info(bay_number, bedname, color, has_patient, pname):
-    """Update information for a specific bed."""
     for i, (bname, _, _, _) in enumerate(bay_beds[bay_number]):
         if bname == bedname:
             bay_beds[bay_number][i] = (bname, color, has_patient, pname)
             break
 
 def create_bed(frame, bed_info, bay_number):
-    """Create an interactive bed widget with optional patient icon and click event."""
     global selected_bed
-
     bedname, color, has_patient, pname = bed_info
-    f = tk.Frame(frame, width=80, height=100, bg="white", bd=1, relief="solid")
-    f.pack_propagate(False)  # Prevent frame from resizing automatically
+    f = tk.Frame(frame, width=70, height=90, bg="white", bd=1, relief="solid")
+    f.pack_propagate(False)
 
-    # Bed name label
     label = tk.Label(f, text=bedname, bg="white", font=("Arial", 10))
     label.pack(side="bottom", pady=5)
 
     icon_lbl = None
-    if has_patient:  # Show patient icon if bed occupied
+    if has_patient:
         icon_lbl = tk.Label(f, text="👤", fg=color, bg="darkgray", font=("Arial", 25))
         icon_lbl.pack(side="top", pady=5)
 
     def on_click(event):
-        """Handle bed click: add or remove a patient, highlight selection."""
         global selected_bed
-
-        # Highlight selected bed
         if selected_bed is not None:
             selected_bed.config(bd=1, relief="solid", highlightthickness=0)
-        f.config(bd=3, relief="solid", highlightbackground="red",
-                 highlightcolor="red", highlightthickness=3)
+        f.config(bd=3, relief="solid", highlightbackground="red", highlightcolor="red", highlightthickness=3)
         selected_bed = f
 
-        # Get current bed info
         _, curr_color, curr_has_patient, curr_name = next(b for b in bay_beds[bay_number] if b[0] == bedname)
 
         if curr_has_patient:
             remove = messagebox.askyesno("Remove Patient", f"Remove {curr_name} from {bedname}?")
             if remove:
                 update_bed_info(bay_number, bedname, "white", False, None)
-                # Keep correct view after removal
                 if current_bay is None:
                     show_all_bays()
                 else:
@@ -137,7 +131,6 @@ def create_bed(frame, bed_info, bay_number):
                     show_bay(current_bay)
                 refresh_tree(current_bay)
 
-    # Bind click events
     f.bind("<Button-1>", on_click)
     label.bind("<Button-1>", on_click)
     if icon_lbl:
@@ -145,87 +138,123 @@ def create_bed(frame, bed_info, bay_number):
 
     return f
 
+# ---------------- Show Specific Bay ---------------- #
 def show_bay(bay_number):
-    """Display all beds for a specific bay."""
     global selected_bed, current_bay
     current_bay = bay_number
-
-    if selected_bed is not None:  # Clear previous selection highlight
+    if selected_bed is not None:
         selected_bed.config(bd=1, relief="solid", highlightthickness=0)
         selected_bed = None
 
-    # Clear previous bed widgets
+    # Show Add Bed button
+    add_bed_btn.pack(side="bottom", fill="x", pady=5)
+
     for widget in beds_frame.winfo_children():
         widget.destroy()
 
-    # Layout beds in grid
     row, col = 0, 0
     for bed_info in bay_beds[bay_number]:
         bed = create_bed(beds_frame, bed_info, bay_number)
         bed.grid(row=row, column=col, padx=15, pady=15)
         col += 1
-        if col > 2:
+        if col > 2:  # wrap beds to next row after 3
             col = 0
             row += 1
 
-    refresh_tree(bay_number)  # Update patient Treeview for this bay
+    bay_label_under = tk.Label(beds_frame, text=f"Bay {bay_number}", font=("Arial", 10, "bold"), bg="lightgray")
+    bay_label_under.grid(row=row+1, column=0, columnspan=3, pady=(0,10))
 
+    refresh_tree(bay_number)
+
+# ---------------- Show All Bays / Patients ---------------- #
 def show_all_bays():
-    """Display all bays side by side with a divider."""
     global selected_bed, current_bay
-    current_bay = None  # All Bays view
-
+    current_bay = None
     if selected_bed is not None:
         selected_bed.config(bd=1, relief="solid", highlightthickness=0)
         selected_bed = None
 
-    # Clear previous bed widgets
+    # Hide Add Bed button in all patients view
+    add_bed_btn.pack_forget()
+
     for widget in beds_frame.winfo_children():
         widget.destroy()
 
-    # Configure 3-column layout: Bay1 | Divider | Bay2
-    beds_frame.columnconfigure(0, weight=1)
-    beds_frame.columnconfigure(1, weight=0)
-    beds_frame.columnconfigure(2, weight=1)
-    beds_frame.rowconfigure(0, weight=1)
+    bays_per_row = 3
+    sorted_bays = sorted(bay_beds.items())
+    for idx, (bay_num, beds) in enumerate(sorted_bays):
+        row = (idx // bays_per_row) * 2
+        col = idx % bays_per_row
 
-    # Bay 1 frame
-    bay1_frame = tk.Frame(beds_frame, bd=1, relief="solid", padx=10, pady=10)
-    bay1_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        bay_container = tk.Frame(beds_frame, bd=1, relief="solid", padx=5, pady=5)
+        bay_container.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
 
-    # Divider between bays
-    divider = tk.Frame(beds_frame, width=3, bg="black")
-    divider.grid(row=0, column=1, sticky="ns")
+        # Wrap beds inside bay
+        for j, bed_info in enumerate(beds):
+            bed_row, bed_col = divmod(j, 3)
+            bed = create_bed(bay_container, bed_info, bay_num)
+            bed.grid(row=bed_row, column=bed_col, padx=5, pady=5)
 
-    # Bay 2 frame
-    bay2_frame = tk.Frame(beds_frame, bd=1, relief="solid", padx=10, pady=10)
-    bay2_frame.grid(row=0, column=2, sticky="nsew", padx=(5, 0))
+        bay_label_under = tk.Label(beds_frame, text=f"Bay {bay_num}", font=("Arial", 10, "bold"), bg="lightgray")
+        bay_label_under.grid(row=row+1, column=col, pady=(0,5))
 
-    # Populate Bay 1 beds
-    for i, bed_info in enumerate(bay_beds[1]):
-        row, col = divmod(i, 3)
-        bed = create_bed(bay1_frame, bed_info, 1)
-        bed.grid(row=row, column=col, padx=15, pady=15)
+        beds_frame.columnconfigure(col, weight=1)
+    for r in range(((len(sorted_bays) + bays_per_row - 1) // bays_per_row) * 2):
+        beds_frame.rowconfigure(r, weight=1)
 
-    # Populate Bay 2 beds
-    for i, bed_info in enumerate(bay_beds[2]):
-        row, col = divmod(i, 3)
-        bed = create_bed(bay2_frame, bed_info, 2)
-        bed.grid(row=row, column=col, padx=15, pady=15)
+    refresh_tree(None)
 
-    refresh_tree(None)  # Refresh patient list to show all bays
+# ---------------- Add Bay Function ---------------- #
+def add_bay():
+    total_bays = len(bay_beds)
+    if total_bays >= MAX_BAYS:
+        messagebox.showwarning("Limit Reached", f"Maximum of {MAX_BAYS} bays reached!")
+        return
+
+    bay_num = total_bays + 1
+    bay_beds[bay_num] = [(f"B{i+1}", "white", False, None) for i in range(3)]
+
+    new_btn = tk.Button(bay_buttons_frame, text=f"- Bay {bay_num}", bg="lightgray", relief="flat",
+                        command=lambda num=bay_num: show_bay(num))
+    new_btn.pack(anchor="w", padx=5)
+
+    messagebox.showinfo("Success", f"Bay {bay_num} added successfully!")
+    if current_bay is None:
+        show_all_bays()
+
+# ---------------- Add Bed Function ---------------- #
+def add_bed():
+    global current_bay
+    if current_bay is None:
+        messagebox.showwarning("No Bay Selected", "Please select a specific bay to add a bed.")
+        return
+
+    beds_in_bay = bay_beds[current_bay]
+    if len(beds_in_bay) >= MAX_BEDS_PER_BAY:
+        messagebox.showwarning("Limit Reached", f"Bay {current_bay} can only have {MAX_BEDS_PER_BAY} beds.")
+        return
+
+    new_bed_name = f"B{len(beds_in_bay)+1}"
+    beds_in_bay.append((new_bed_name, "white", False, None))
+    show_bay(current_bay)
 
 # ---------------- Sidebar Buttons ---------------- #
-bay1_btn = tk.Button(sidebar, text="- Bay 1", bg="lightgray", relief="flat", command=lambda: show_bay(1))
-bay1_btn.pack(anchor="w", padx=20)
+bay1_btn = tk.Button(bay_buttons_frame, text="- Bay 1", bg="lightgray", relief="flat", command=lambda: show_bay(1))
+bay1_btn.pack(anchor="w", padx=5)
 
-bay2_btn = tk.Button(sidebar, text="- Bay 2", bg="lightgray", relief="flat", command=lambda: show_bay(2))
-bay2_btn.pack(anchor="w", padx=20)
+bay2_btn = tk.Button(bay_buttons_frame, text="- Bay 2", bg="lightgray", relief="flat", command=lambda: show_bay(2))
+bay2_btn.pack(anchor="w", padx=5)
 
 patients_btn = tk.Button(sidebar, text="Show All Patients", relief="flat", bg="gray25", fg="white", command=show_all_bays)
-patients_btn.pack(anchor="w", padx=10, pady=20, fill="x")
+patients_btn.pack(anchor="w", padx=5, pady=5, fill="x")
+
+add_bay_btn = tk.Button(sidebar, text="+ Add Bay", bg="lightblue", relief="raised", command=add_bay)
+add_bay_btn.pack(side="bottom", fill="x", pady=5)
+
+# Add Bed button created but packed dynamically
+add_bed_btn = tk.Button(sidebar, text="+ Add Bed", bg="lightgreen", relief="raised", command=add_bed)
 
 # ---------------- Default Load ---------------- #
-show_bay(1)  # Load Bay 1 by default
+show_bay(1)
 
-root.mainloop()  # Start Tkinter main loop
+root.mainloop()

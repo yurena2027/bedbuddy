@@ -1,120 +1,127 @@
-# FastAPI authentication backend for BedBuddy.
+# --------------------------------------------
+# Simple FastAPI authentication backend for BedBuddy
+# --------------------------------------------
+# This file creates two endpoints:
+#   1. /auth/register  -> add a new user to MongoDB
+#   2. /auth/login     -> verify username + password and return a JWT token
 #
-# This script connects to MongoDB Atlas using environment variables from a .env file,
-# and exposes two endpoints:
-#  • POST /auth/register  → Create new users
-#  • POST /auth/login     → Authenticate and issue JWT tokens
-
+# We are using:
+#   - FastAPI (web framework)
+#   - Motor (async MongoDB driver)
+#   - Passlib (for password hashing)
+#   - python-jose (for JWT tokens)
+#   - dotenv (to load secrets from .env)
+# 
 # References:
-# - Python Software Foundation. (2024). FastAPI documentation. 
-#   https://fastapi.tiangolo.com/
-# - MongoDB, Inc. (2025). PyMongo and Motor: Async MongoDB driver for Python. 
-#   https://motor.readthedocs.io/
-# - The Passlib Project. (2024). *Passlib: Password hashing framework for Python*. 
-#   https://passlib.readthedocs.io/
-# - Jose Library. (2024). *python-jose for JWT encoding/decoding*. GitHub repository.
-#   https://github.com/mpdavis/python-jose
+#     Davis, M. P. (2024). python-jose: JWT library for Python. GitHub repository. 
+#           https://github.com/mpdavis/python-jose
+#     Grinberg, M. (2023). JWT Authentication with Python. Real Python. 
+#           https://realpython.com/token-based-authentication-with-flask/
+#     MongoDB, Inc. (2025). Motor: Asynchronous Python driver for MongoDB. 
+#           https://motor.readthedocs.io/
+#     Python Software Foundation. (2024). FastAPI documentation. 
+#           https://fastapi.tiangolo.com/
+#     Python Software Foundation. (2024). dotenv — Python-dotenv library. 
+#           https://pypi.org/project/python-dotenv/
+#     The Passlib Project. (2024). Passlib: Password hashing framework for Python. 
+#           https://passlib.readthedocs.io/
 
 # ----------------------------
 # Imports and setup
 # ----------------------------
+# FastAPI is the asynchronous web framework used for defining REST endpoints.
 from fastapi import FastAPI, HTTPException
+# Pydantic provides type validation for incoming request bodies.
 from pydantic import BaseModel
-from motor.motor_asyncio import AsyncIOMotorClient # from mongoDB wrapper for PyMongo, async
+# Motor is the asynchronous MongoDB driver maintained by MongoDB Inc.
+from motor.motor_asyncio import AsyncIOMotorClient
+# Load environment variables from the .env configuration file.
 from dotenv import load_dotenv
 import os
+
+# Import the helper functions from security.py
 from security import hash_password, verify_password, create_access_token
 
+# Load environment variables (.env should be in the same folder)
 load_dotenv()
 
-# Initialize the FastAPI app
-app = FastAPI(title="BedBuddy Authentication API")
+# Create the FastAPI app
+app = FastAPI(title="BedBuddy Auth API")
 
-# ----------------------------
-# Database configuration
-# ----------------------------
-# Use the correct variable names from your .env file
+# Connect to MongoDB Atlas
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 
-# Create a MongoDB Atlas client and connect to the specific database
+# Motor connects asynchronously, so we can use "await" when calling it
 client = AsyncIOMotorClient(MONGO_URI)
-db = client[DB_NAME]   # Example: bedbuddy
-users = db["users"]    # Collection name "users"
+db = client[DB_NAME]
+users = db["users"]  # collection where we store user data
+
 
 # ----------------------------
-# Request models
+# Define what kind of data we expect from the user
 # ----------------------------
 class UserCreds(BaseModel):
     username: str
     password: str
 
-# ----------------------------
-# Endpoints
-# ----------------------------
 
+# ----------------------------
+# Endpoint: Register
+# ----------------------------
 @app.post("/auth/register", status_code=201)
 async def register(body: UserCreds):
     """
-    Register a new user.
-    - Checks if username already exists
-    - Hashes the password using bcrypt
-    - Stores the user in MongoDB
+    Create a new user account.
+    Steps:
+      1. Check if username already exists.
+      2. Hash the password.
+      3. Save to MongoDB.
     """
-    # Check if user already exists
-    if await users.find_one({"username": body.username}):
+    existing_user = await users.find_one({"username": body.username})
+    if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
-    
-    # Hash password before storing
+
     hashed_pw = hash_password(body.password)
-    
-    # Insert new user record
-    await users.insert_one({"username": body.username, "password_hash": hashed_pw})
-    
-    return {"msg": "User registered successfully."}
+    await users.insert_one({
+        "username": body.username,
+        "password_hash": hashed_pw
+    })
+    return {"msg": "User registered successfully"}
 
 
+# ----------------------------
+# Endpoint: Login
+# ----------------------------
 @app.post("/auth/login")
 async def login(body: UserCreds):
     """
-    Login an existing user.
-    - Finds the username in MongoDB
-    - Verifies the hashed password
-    - Returns a signed JWT token if successful
+    Log in an existing user.
+    Steps:
+      1. Find the user in the database.
+      2. Verify password using bcrypt.
+      3. If correct, create and return a JWT token.
     """
     user = await users.find_one({"username": body.username})
-    
-    # Handle invalid username or password
+
     if not user or not verify_password(body.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
-    
-    # Generate JWT token
+
     token = create_access_token(body.username)
-    
     return {"access_token": token, "token_type": "bearer"}
 
 
 # ----------------------------
-# Quick notes
+# How to test
 # ----------------------------
 """
+1. Run the API server:
+   uvicorn auth_api:app --reload
 
-# To test:
-# uvicorn auth_api:app --reload
-# Go to http://127.0.0.1:8000/docs
+2. In your browser, open:
+   http://127.0.0.1:8000/docs
 
-Expected endpoints:
-    POST http://127.0.0.1:8000/auth/register
-    POST http://127.0.0.1:8000/auth/login
-
-Example test with curl:
-    curl -X POST http://127.0.0.1:8000/auth/register 
-         -H "Content-Type: application/json" 
-         -d '{"username":"admin","password":"MyPass123!"}'
-
-Example response:
-    {"msg": "User registered successfully."}
-
-Then login:
-    {"access_token":"<token>","token_type":"bearer"}
+3. You'll see an automatic API tester.
+   - Try POST /auth/register  →  make a new user
+   - Try POST /auth/login     →  log in and see the token
 """

@@ -1,33 +1,35 @@
 # ==================================
 # Hospital Bed Management – Login
-# Class-based design with MFA + logo
+# Tkinter GUI with FastAPI backend
 # ==================================
 
-# tkinter is pythons standard GUI library
-# ttk provides themed widgets
-# messagebox gives popup dialogs
-# PhotoImage handles images like PNG/GIF/PPM
+# tkinter is pythons standard GUI library (Python Software Foundation, 2025a)
+# ttk provides themed widgets; messagebox gives popup dialogs
+# PhotoImage handles images like PNG/GIF/PPM formats
 
-# Import Tkinter core library for GUI
+# -----Imports-------
+# Tkinter core library for GUI 
 import tkinter as tk
-# Import ttk for themed widgets and messagebox for pop-ups
+# ttk for themed widgets and messagebox for pop-ups
 from tkinter import ttk, messagebox, PhotoImage
-# Import authentication backend and role management
-# from auth_backend import authenticate, get_user_roles
-# Import hospital bed management launcher (opens after login)
-#from bed_management import launch_bed_management
-import platform # Detect OS
-import os
+import platform # Detect Operating System (Python Software Foundation, 2025c)
+import os       # File path utility (Python Software Foundation, 2025b)
+import requests # For HTTP requests to FastAPI backend (Reitz & Chisamore, 2024)
 
+# ------------------
+# Login Window Class
+# ------------------ 
 # Define a Login class that inherits from Tkinter's root window (tk.Tk)
 class Login(tk.Tk):
+    '''GUI login window integrated with FastAPI authentication backend'''
     def __init__(self):
+        ''' Initializes the login window layout and widget '''
         super().__init__()  # Initialize parent Tkroot window
         self.title("Bed Management – Login")  # Set window title
-        self.geometry("400x350")  # Set window size
-        self.resizable(False,False)  # Disable resizing
+        self.geometry("400x350")              # Set window size
+        self.resizable(False,False)           # Disable resizing
 
-        # Cross-platform window icon
+        # Cross-platform window icon (Python Software Foundation, 2025a)
         try:
             if platform.system() == "Windows":
                 # Windows prefers .ico format
@@ -53,7 +55,7 @@ class Login(tk.Tk):
             logo_button = tk.Button(
                 frame,
                 image = self.logo_img,
-                command = self.show_about, # clickalbe logo opens info
+                command = self.show_about, # clickable logo opens info
                 borderwidth=0,
                 highlightthickness=0
             )
@@ -62,16 +64,16 @@ class Login(tk.Tk):
             print("Logo not found", e)
 
          # Username label and entry field
-        ttk.Label(frame, text="Username").grid(row=1, column=0, sticky="w")
+        ttk.Label(frame, text="username").grid(row=1, column=0, sticky="w")
         self.e_user = ttk.Entry(frame, width=26)  # Input box for username
         self.e_user.grid(row=1, column=1, pady=4)
 
         # Password label and entry field (hidden with • for security)
-        ttk.Label(frame, text="Password").grid(row=2, column=0, sticky="w")
+        ttk.Label(frame, text="password").grid(row=2, column=0, sticky="w")
         self.e_pass = ttk.Entry(frame, show="•", width=26)
         self.e_pass.grid(row=2, column=1, pady=4)
 
-       # Prepare MFA label and entry but do not display until required
+       # MFA (option and will not be connected) (NIST, 2020)
         self.lbl_mfa = ttk.Label(frame, text="MFA Code")
         self.e_mfa = ttk.Entry(frame, width=26)
 
@@ -84,7 +86,7 @@ class Login(tk.Tk):
             row=4, column=0, columnspan=2, sticky="ew", pady=(8, 0)
         )
 
-        # Bind Enter/Return key to also trigger login
+        # Allow pressing Enter/Return to login
         self.bind("<Return>", lambda e: self.do_login())
 
         # Configure grid so both columns expand evenly
@@ -98,43 +100,87 @@ class Login(tk.Tk):
 
     # Show an About dialog when logo is clicked
     def show_about(self):
-        messagebox.showinfo("About", "Hospital Bed Management System\nVersion 1.0")
+        messagebox.showinfo("About", "Hospital Bed Management System\n" \
+        "CS 3300 Project\nDeveloped by BedBuddy")
 
-    # Main login logic
+    # Main login logic: FastAPI Integration
     def do_login(self):
-        u = self.e_user.get().strip()  # Get username (remove spaces)
-        p = self.e_pass.get()  # Get password
-        # Get MFA if the field is visible, otherwise None
-        mfa = self.e_mfa.get().strip() if self.e_mfa.winfo_ismapped() else None
+        ''' Attempt to log in a user through the FastAPI backend
+            
+            Steps:
+            1. Read the username and password typed into the login form
+            2. Send the data to the backend endpoints '/auth/login' using http POST
+                (Reitz & Chisamore, 2024; Tiangolo, 2024)
+            3. If backend confimrs login, display a success message and close the window
+            4. If backend rejects login, display error message in red (Tiangolo, 2024)
+            5. If backend cannot be reached, show a server error message 
+            
+        '''
+        username = self.e_user.get().strip()  # Get the entered username (remove spaces)
+        password = self.e_pass.get()          # Get the entered password
         
-        # --- Temporary logic for testing GUI only ---
-        if u == "admin" and p == "password":  
-            messagebox.showinfo("Login Success", f"Welcome {u}! (stubbed, no DB yet)")
-            self.destroy()
-            # later: launch_bed_management(u, roles)
-        else:
-            self.status.config(text="Invalid username or password") 
+        try:
+            ''' Send a request to the FastAPI backend at the /auth/login address
+                We are using the HTTP "POST" method which means:
+                - We are sending data to the server (username & password)
+                - The server will process the data and give us a respionse
+                (REitz & Chisamore, 2024; Tiangolo, 2024)
+            '''
+            response = requests.post("http://127.0.0.1:8000/auth/login", json={
+                "username": username,   # Take the username. from the Tkinter form
+                "password": password    # Take the password from the Tkinter form
+            })
+
+            # If the server responds with status code 200, it means login worked
+            # (Tiangolo, 2025)
+            if response.status_code == 200:
+                # Convert the server's JSON reply into a Python dictionary
+                data = response.json()
+
+                # Get the "access_token" from the reply
+                # This token is a JSON web token (JWT) used to prove you are logged in 
+                # (Davis, 2024)
+                access_token = data.get("access_token")
+
+                # Show a success message in a Tkinter popup
+                messagebox.showinfo("Success", "Login successful.")
+                # Close the login window
+                self.destroy()
+            else: 
+                # GUI first looks for the detail field returned by FastAPI. 
+                # If it’s not there, it defaults to a generic message Login 
+                # failed so users still see feedback (Tiangolo, 2025)
+                error_message = response.json().get("detail", "Login failed")
+                self.status.config(text=error_message) 
         
-        # Call backend authentication once this is set up (see the above for testing)
-        #ok, user_id, msg = authenticate(u, p, mfa)
-        #if not ok:  # If login failed
-        #    if msg == "MFA code required.":  # If MFA is needed
-        #        self.status.config(text="Enter your 6-digit MFA code.")
-        #       self.show_mfa()  # Reveal MFA field
-        #    else:
-        #        self.status.config(text=msg)  # Show error message
-        #    return
-
-         # On success: launch bed management and close login
-        #roles = get_user_roles(u)
-        #messagebox.showinfo("Login Success", f"Welcome {u}! Role: {roles}")
-        #self.destroy()
-        #launch_bed_management(u, roles)
-
-        # On success: show messagebox and close login window
-        messagebox.showinfo("Success", "Login successful.")
-        self.destroy()
-
+        # Handles cases like server down, no internet (Reitz & Chisamore, 2024)
+        except requests.exceptions.RequestException as error:
+            
 # Entry point: run Login GUI
 if __name__ == "__main__":
     Login().mainloop()
+
+'''
+References:
+Davis, M. P. (2024). python-jose: JWT library for Python. GitHub. 
+    https://github.com/mpdavis/python-jose
+Jose project team. (2024). PyJWT documentation. PyJWT. 
+    https://pyjwt.readthedocs.io/
+National Institute of Standards and Technology. (2020). Digital 
+    identity guidelines: Authentication and lifecycle management 
+(NIST Special Publication 800-63B). U.S. Department of Commerce. 
+    https://doi.org/10.6028/NIST.SP.800-63b
+Python Software Foundation. (2025, October 29). tkinter — Python 
+    interface to Tcl/Tk. In Python 3.13 documentation. 
+    https://docs.python.org/3/library/tkinter.html
+Python Software Foundation. (2025, October 29). os — Miscellaneous 
+    operating system interfaces. In Python 3.13 documentation. 
+    https://docs.python.org/3/library/os.html
+Python Software Foundation. (2025, October 29). platform — Access 
+    to underlying platform’s identifying data. In Python 3.13 documentation. 
+    https://docs.python.org/3/library/platform.html
+Reitz, K., & Chisamore, E. (2024). Requests: HTTP for humans. 
+    Python Requests. https://requests.readthedocs.io/
+Tiangolo, S. (2025). FastAPI documentation. FastAPI. 
+    https://fastapi.tiangolo.com/
+'''

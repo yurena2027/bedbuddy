@@ -6,49 +6,36 @@
 #   2. /auth/login     -> verify username + password and return a JWT token
 #
 # We are using:
-#   - FastAPI (web framework)
-#   - Motor (async MongoDB driver)
-#   - Passlib (for password hashing)
-#   - python-jose (for JWT tokens)
-#   - dotenv (to load secrets from .env)
+#   - FastAPI (web framework) (Tiangolo, 2025)
+#   - Motor (async MongoDB driver) (MongoDB Inc., 2025)
+#   - Passlib (for password hashing) (The Passlib Project, 2024)
+#   - python-jose (for JWT tokens) (Davis, 2024)
+#   - dotenv (to load secrets from .env variable) (PypA, 2025)
 # 
-# References:
-#     Davis, M. P. (2024). python-jose: JWT library for Python. GitHub repository. 
-#           https://github.com/mpdavis/python-jose
-#     Grinberg, M. (2023). JWT Authentication with Python. Real Python. 
-#           https://realpython.com/token-based-authentication-with-flask/
-#     MongoDB, Inc. (2025). Motor: Asynchronous Python driver for MongoDB. 
-#           https://motor.readthedocs.io/
-#     Python Software Foundation. (2024). FastAPI documentation. 
-#           https://fastapi.tiangolo.com/
-#     Python Software Foundation. (2024). dotenv — Python-dotenv library. 
-#           https://pypi.org/project/python-dotenv/
-#     The Passlib Project. (2024). Passlib: Password hashing framework for Python. 
-#           https://passlib.readthedocs.io/
-
 # ----------------------------
 # Imports and setup
 # ----------------------------
-# FastAPI is the asynchronous web framework used for defining REST endpoints.
+# FastAPI is the asynchronous web framework used for defining REST endpoints (Tiangolo, 2025)
 from fastapi import FastAPI, HTTPException
-# Pydantic provides type validation for incoming request bodies.
+# Pydantic provides type validation for incoming request bodies (Tiangolo, 2025)
 from pydantic import BaseModel
-# Motor is the asynchronous MongoDB driver maintained by MongoDB Inc.
+# Motor is the asynchronous MongoDB driver maintained by MongoDB Inc.(MongoDB Inc., 2025)
 from motor.motor_asyncio import AsyncIOMotorClient
-# Load environment variables from the .env configuration file.
+# Load environment variables from the .env configuration file (PyPA, 2025).
 from dotenv import load_dotenv
+# For accessing environment variable (Python Software Foundation, 2025)
 import os
 
-# Import the helper functions from security.py
+# Import the helper functions from security.py (Davis, 2024; The Passlib Project, 2024)
 from security import hash_password, verify_password, create_access_token
 
-# Load environment variables (.env should be in the same folder)
+# Load environment variables (.env should be in the same folder)(PyPA, 2024)
 load_dotenv()
 
-# Create the FastAPI app
+# Create the FastAPI app (Tiangolo, 2025)
 app = FastAPI(title="BedBuddy Auth API")
 
-# Connect to MongoDB Atlas
+# Connect to MongoDB Atlas (MongoDB Inc., 2025)
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 
@@ -62,9 +49,14 @@ users = db["users"]  # collection where we store user data
 # Define what kind of data we expect from the user
 # ----------------------------
 class UserCreds(BaseModel):
+    '''
+    Defines the shape of the data coming in the request:
+    - username: str
+    - password: str
+    (Tiangolo, 2025)
+    '''
     username: str
     password: str
-
 
 # ----------------------------
 # Endpoint: Register
@@ -72,17 +64,17 @@ class UserCreds(BaseModel):
 @app.post("/auth/register", status_code=201)
 async def register(body: UserCreds):
     """
-    Create a new user account.
+    Create a new user account (Tiangolo, 2025; MongoDB Inc., 2025).
     Steps:
-      1. Check if username already exists.
-      2. Hash the password.
+      1. Check if username already exists in MongoDB.
+      2. Hash the password with bcrypt (The Passlib Project, 2024).
       3. Save to MongoDB.
     """
     existing_user = await users.find_one({"username": body.username})
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
 
-    hashed_pw = hash_password(body.password)
+    hashed_pw = hash_password(body.password) # Secure bcrypt hash
     await users.insert_one({
         "username": body.username,
         "password_hash": hashed_pw
@@ -96,11 +88,11 @@ async def register(body: UserCreds):
 @app.post("/auth/login")
 async def login(body: UserCreds):
     """
-    Log in an existing user.
+    Log in an existing user (Tiangolo, 2025).
     Steps:
-      1. Find the user in the database.
-      2. Verify password using bcrypt.
-      3. If correct, create and return a JWT token.
+      1. Find the user in the database (MongoDB Inc., 2025).
+      2. Verify password using bcrypt 9The Passlib Project, 2024).
+      3. If correct, create and return a JWT token (Davis, 2024).
     """
     user = await users.find_one({"username": body.username})
 
@@ -122,6 +114,21 @@ async def login(body: UserCreds):
    http://127.0.0.1:8000/docs
 
 3. You'll see an automatic API tester.
-   - Try POST /auth/register  →  make a new user
-   - Try POST /auth/login     →  log in and see the token
+   - Try POST /auth/register  →  create new user
+   - Try POST /auth/login     →  log in and receive JWT token
 """
+# References:
+# Davis, M. P. (2024). python-jose: JWT library for Python
+#       [Software repository]. GitHub. https://github.com/mpdavis/python-jose
+# MongoDB Inc. (2025). Motor: Asynchronous Python driver for MongoDB
+#       [Documentation]. https://motor.readthedocs.io/
+# PyPA. (2025). python-dotenv* [Software package]. 
+#       PyPI. https://pypi.org/project/python-dotenv/
+# Python Software Foundation. (2025, October 29). os — 
+#       Miscellaneous operating system interfaces. In Python 3.13 documentation*. 
+#       https://docs.python.org/3/library/os.html
+# The Passlib Project. (2024). Passlib: Password hashing framework for Python 
+#       [Documentation]. https://passlib.readthedocs.io/
+# Tiangolo, S. (2025). FastAPI documentation. FastAPI. 
+#       https://fastapi.tiangolo.com/
+

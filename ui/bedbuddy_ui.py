@@ -1,6 +1,13 @@
-
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox
+
+# import patient class for data handling
+from database.patient import Patient
+# import connection manager and db_op class
+from config.db_config import get_db
+from database.db_operation import Database
+# database = db_op class
+database = Database(get_db())
 
 MAX_BAYS = 6
 MAX_BEDS_PER_BAY = 6
@@ -12,17 +19,8 @@ class BedBuddy:
         self.root.geometry("1500x450")
 
         # ---------------- Data ---------------- #
-        self.bay_beds = {
-            1: [
-                ("B1", "yellow", True, "John Green"),
-                ("B2", "yellow", True, "Brandon Sanderson"),
-                ("B3", "white", False, None)
-            ],
-            2: [
-                ("B1", "yellow", True, "Rick Riordan"),
-                ("B2", "white", False, None)
-            ]
-        }
+        self.bay_beds: dict[int, list[Patient]] = {}
+        self.load_db_bays()
 
         # ---------------- State ---------------- #
         self.selected_bed = None
@@ -33,6 +31,14 @@ class BedBuddy:
         self.setup_patient_view()
         self.setup_bay_view()
         self.show_bay(1)
+
+    # ---------------- Initial Data Loading Method ---------------- #
+    def load_db_bays(self) -> dict[int, list[Patient]]:
+        bays = [int(bay) for bay in database.db.list_collection_names()]
+        for bay in bays:
+            patients = database.get_bay_patients(bay)  # returns list[Patient]
+            self.bay_beds[bay] = patients
+        return self.bay_beds
 
     # ---------------- Setup Methods ---------------- #
     def setup_sidebar(self):
@@ -113,28 +119,28 @@ class BedBuddy:
         bays_to_show = [bay_filter] if bay_filter else self.bay_beds.keys()
 
         for bay_num in bays_to_show:
-            for bedname, color, has_patient, pname in self.bay_beds[bay_num]:
-                if has_patient:
-                    location = f"Bay {bay_num} / {bedname}"
-                    self.tree.insert("", "end", values=(pname, location, "..."))
+            for patient in self.bay_beds[bay_num]:
+                if patient.presence:
+                    patient_name = f"{patient.first_name} {patient.last_name}"
+                    patient_location = f"Bay {patient.bay} / Bed {patient.bed}"
+                    self.tree.insert("", "end", values=(patient_name, patient_location, "..."))
 
-    def update_bed_info(self, bay_number, bedname, color, has_patient, pname):
-        for i, (bname, _, _, _) in enumerate(self.bay_beds[bay_number]):
-            if bname == bedname:
-                self.bay_beds[bay_number][i] = (bname, color, has_patient, pname)
+    def update_bed_info(self, curr_patient):
+        for i, patient in enumerate(self.bay_beds[curr_patient.bay]):
+            if patient.bed == curr_patient.bed:
+                self.bay_beds[curr_patient.bay][i] = curr_patient
                 break
 
-    def create_bed(self, frame, bed_info, bay_number):
-        bedname, color, has_patient, pname = bed_info
+    def create_bed(self, frame, patient):
         f = tk.Frame(frame, width=70, height=90, bg="white", bd=1, relief="solid")
         f.pack_propagate(False)
 
-        label = tk.Label(f, text=bedname, bg="white", font=("Arial", 10))
+        label = tk.Label(f, text=patient.bed, bg="white", font=("Arial", 10))
         label.pack(side="bottom", pady=5)
 
         icon_lbl = None
-        if has_patient:
-            icon_lbl = tk.Label(f, text="👤", fg=color, bg="darkgray", font=("Arial", 25))
+        if patient.presence:
+            icon_lbl = tk.Label(f, text="👤", fg=patient.color, bg="darkgray", font=("Arial", 25))
             icon_lbl.pack(side="top", pady=5)
 
         def on_click(event):
@@ -143,18 +149,31 @@ class BedBuddy:
             f.config(bd=3, relief="solid", highlightbackground="red", highlightcolor="red", highlightthickness=3)
             self.selected_bed = f
 
-            _, curr_color, curr_has_patient, curr_name = next(b for b in self.bay_beds[bay_number] if b[0] == bedname)
+            curr_patient = next(
+                (p for p in self.bay_beds.get(patient.bay, []) if p.bed == patient.bed),
+                None
+            )
 
-            if curr_has_patient:
-                remove = messagebox.askyesno("Remove Patient", f"Remove {curr_name} from {bedname}?")
+            if curr_patient.presence:
+                remove = messagebox.askyesno("Remove Patient", f"Remove {patient.first_name} {patient.last_name} from {patient.bed}?")
                 if remove:
-                    self.update_bed_info(bay_number, bedname, "white", False, None)
+                    self.update_bed_info(Patient.empty(curr_patient.bay, curr_patient.bed))
                     self.show_bay(self.current_bay)
                     self.refresh_tree(self.current_bay)
             else:
-                pname_input = simpledialog.askstring("Add Patient", f"Enter patient name for {bedname}:")
+                pname_input = simpledialog.askstring("Add Patient", f"Enter patient name for {patient.bed}:")
                 if pname_input:
-                    self.update_bed_info(bay_number, bedname, "yellow", True, pname_input)
+                    self.update_bed_info(Patient(
+                        first_name=pname_input,
+                        last_name=pname_input,
+                        dob="",
+                        bay=curr_patient.bay,
+                        bed=curr_patient.bed,
+                        priority="",
+                        color="deeppink2",
+                        presence=True,
+                        _id=None
+                    ))
                     self.show_bay(self.current_bay)
                     self.refresh_tree(self.current_bay)
 
@@ -167,7 +186,11 @@ class BedBuddy:
 
     # ---------------- Bay Methods ---------------- #
     def show_bay(self, bay_number):
-        self.current_bay = bay_number
+        if bay_number is None:
+            self.current_bay = 1
+        else:
+            self.current_bay = bay_number
+
         if self.selected_bed:
             self.selected_bed.config(bd=1, relief="solid", highlightthickness=0)
             self.selected_bed = None
@@ -179,8 +202,8 @@ class BedBuddy:
             widget.destroy()
 
         row, col = 0, 0
-        for bed_info in self.bay_beds[bay_number]:
-            bed = self.create_bed(self.beds_frame, bed_info, bay_number)
+        for patient in self.bay_beds[self.current_bay]:
+            bed = self.create_bed(self.beds_frame, patient)
             bed.grid(row=row, column=col, padx=15, pady=15)
             col += 1
             if col > 2:
@@ -213,9 +236,10 @@ class BedBuddy:
             bay_container = tk.Frame(self.beds_frame, bd=1, relief="solid", padx=5, pady=5)
             bay_container.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
 
-            for j, bed_info in enumerate(beds):
+            patients = self.bay_beds.get(bay_num, [])
+            for j, patient in enumerate(patients):
                 bed_row, bed_col = divmod(j, 3)
-                bed = self.create_bed(bay_container, bed_info, bay_num)
+                bed = self.create_bed(bay_container, patient)
                 bed.grid(row=bed_row, column=bed_col, padx=5, pady=5)
 
             bay_label_under = tk.Label(self.beds_frame, text=f"Bay {bay_num}", font=("Arial", 10, "bold"), bg="lightgray")
@@ -234,7 +258,7 @@ class BedBuddy:
             return
 
         bay_num = total_bays + 1
-        self.bay_beds[bay_num] = [(f"B{i+1}", "white", False, None) for i in range(3)]
+        self.bay_beds[bay_num] = []
 
         new_btn = tk.Button(self.bay_buttons_frame, text=f"- Bay {bay_num}", bg="lightgray", relief="flat",
                             command=lambda num=bay_num: self.show_bay(num))
@@ -273,8 +297,8 @@ class BedBuddy:
             messagebox.showwarning("Limit Reached", f"Bay {self.current_bay} can only have {MAX_BEDS_PER_BAY} beds.")
             return
 
-        new_bed_name = f"B{len(beds_in_bay)+1}"
-        beds_in_bay.append((new_bed_name, "white", False, None))
+        new_bed_name = f"{len(beds_in_bay)+1}"
+        beds_in_bay.append(Patient.empty(self.current_bay, new_bed_name))
         self.show_bay(self.current_bay)
 
     def remove_bed(self):
@@ -288,7 +312,7 @@ class BedBuddy:
             return
 
         bed_to_remove = beds_in_bay[-1]
-        confirm = messagebox.askyesno("Remove Bed", f"Remove {bed_to_remove[0]} from Bay {self.current_bay}?")
+        confirm = messagebox.askyesno("Remove Bed", f"Remove {bed_to_remove} from Bay {self.current_bay}?")
         if confirm:
             beds_in_bay.pop()
             self.show_bay(self.current_bay)

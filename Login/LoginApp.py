@@ -1,17 +1,28 @@
+
+# LoginApp.py
 # ==================================
 # Hospital Bed Management – Login
 # Tkinter GUI with FastAPI backend
 # ==================================
-
-# tkinter is pythons standard GUI library (Python Software Foundation, 2025a)
-# ttk provides themed widgets; messagebox gives popup dialogs
-# PhotoImage handles images like PNG/GIF/PPM formats
-
+# 
+# Purpose of the code:
+#   - Provides a graphical login interface (username & password)
+#   - Send credentials to the FastAPI backend for verification
+#   - Display success or error messages based on the backend response.
+#
+# Desing notes:
+#   - tkinter is pythons standard GUI library (Python Software Foundation)
+#   - Widgets such as Label, Entry, and Button follow common usage patterns
+#     described in Tkinter tutorials and references (Shipman, 2013; TkDocs, 2024; Real Python, 2024)
+#   - The requests library is used to communicate with the HTTP API exposed by FastAPI
+#     (Python Software Foundation, 2024b; Tiangolo, 2024)
+#   
 # -----Imports-------
 # Tkinter core library for GUI 
 import tkinter as tk
 # ttk for themed widgets and messagebox for pop-ups
 from tkinter import ttk, messagebox, PhotoImage
+from fastapi import status # symbolic HTTP status codes for clarity (Tiangolo, 2025)
 import platform # Detect Operating System (Python Software Foundation, 2025c)
 import os       # File path utility (Python Software Foundation, 2025b)
 import requests # For HTTP requests to FastAPI backend (Reitz & Chisamore, 2024)
@@ -23,13 +34,13 @@ import requests # For HTTP requests to FastAPI backend (Reitz & Chisamore, 2024)
 class Login(tk.Tk):
     '''GUI login window integrated with FastAPI authentication backend'''
     def __init__(self):
-        ''' Initializes the login window layout and widget '''
+        ''' Initializes the login window layout and widget configuration.'''
         super().__init__()  # Initialize parent Tkroot window
         self.title("Bed Management – Login")  # Set window title
         self.geometry("400x350")              # Set window size
         self.resizable(False,False)           # Disable resizing
 
-        # Cross-platform window icon (Python Software Foundation, 2025a)
+        # Cross-platform window icon handling (Python Software Foundation, 2025a)
         try:
             if platform.system() == "Windows":
                 # Windows prefers .ico format
@@ -68,14 +79,10 @@ class Login(tk.Tk):
         self.e_user = ttk.Entry(frame, width=26)  # Input box for username
         self.e_user.grid(row=1, column=1, pady=4)
 
-        # Password label and entry field (hidden with • for security)
+        # Password label and entry field (hidden with * for security)
         ttk.Label(frame, text="password").grid(row=2, column=0, sticky="w")
-        self.e_pass = ttk.Entry(frame, show="•", width=26)
+        self.e_pass = ttk.Entry(frame, show="*", width=26)
         self.e_pass.grid(row=2, column=1, pady=4)
-
-       # MFA (option and will not be connected) (NIST, 2020)
-        self.lbl_mfa = ttk.Label(frame, text="MFA Code")
-        self.e_mfa = ttk.Entry(frame, width=26)
 
         # Label for status/error messages (red text)
         self.status = ttk.Label(frame, text="", foreground="red")
@@ -93,11 +100,6 @@ class Login(tk.Tk):
         for i in range(2):
             frame.grid_columnconfigure(i, weight=1)
 
-    # Show the MFA input field if authentication backend requires it
-    def show_mfa(self):
-        self.lbl_mfa.grid(row=2, column=0, sticky="w")
-        self.e_mfa.grid(row=2, column=1, pady=4)
-
     # Show an About dialog when logo is clicked
     def show_about(self):
         messagebox.showinfo("About", "Hospital Bed Management System\n" \
@@ -110,9 +112,9 @@ class Login(tk.Tk):
             Steps:
             1. Read the username and password typed into the login form
             2. Send the data to the backend endpoints '/auth/login' using http POST
-                (Reitz & Chisamore, 2024; Tiangolo, 2024)
-            3. If backend confimrs login, display a success message and close the window
-            4. If backend rejects login, display error message in red (Tiangolo, 2024)
+               (Reitz & Chisamore, 2024; Tiangolo, 2024)
+            3. If backend confimrs login (response 200), display a success message and close the window
+            4. If backend rejects login, display 401 error message in red (Tiangolo, 2024)
             5. If backend cannot be reached, show a server error message 
             
         '''
@@ -126,14 +128,15 @@ class Login(tk.Tk):
                 - The server will process the data and give us a respionse
                 (REitz & Chisamore, 2024; Tiangolo, 2024)
             '''
-            response = requests.post("http://127.0.0.1:8000/auth/login", json={
+            response = requests.post(
+                "http://127.0.0.1:8000/auth/login", json={
                 "username": username,   # Take the username. from the Tkinter form
                 "password": password    # Take the password from the Tkinter form
             })
 
             # If the server responds with status code 200, it means login worked
             # (Tiangolo, 2025)
-            if response.status_code == 200:
+            if response.status_code == status.HTTP_200_OK:
                 # Convert the server's JSON reply into a Python dictionary
                 data = response.json()
 
@@ -146,14 +149,24 @@ class Login(tk.Tk):
                 messagebox.showinfo("Success", "Login successful.")
                 # Close the login window
                 self.destroy()
-            else: 
+            
+            elif response.status_code == status.HTTP_401_UNAUTHORIZED:
+
                 # GUI first looks for the detail field returned by FastAPI. 
                 # If it’s not there, it defaults to a generic message Login 
                 # failed so users still see feedback (Tiangolo, 2025)
                 error_message = response.json().get("detail", "Login failed")
                 self.status.config(text=error_message) 
+
+            else: 
+                
+                messagebox.showerror(
+                    "Error",
+                    f"Unexpected response ({response.status_code}): {response.text}"
+                )
+                
         
-        # Handles cases like server down, no internet (Reitz & Chisamore, 2024)
+        # Handles cases like server down, no internet connection(Reitz & Chisamore, 2024)
         except requests.exceptions.RequestException as error:
             
 # Entry point: run Login GUI

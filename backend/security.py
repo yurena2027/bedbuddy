@@ -16,7 +16,7 @@
 # ----------------------------
 # Imports
 # ----------------------------
-from passlib.context import CryptContext      # handles bcrypt hashing of passwords (The Passlib Project, 2024)
+from passlib.context import CryptContext      # handles hashing of passwords (The Passlib Project, 2024)
 from jose import jwt                          # encodes/decodes JWT access tokens (Davis, 2024)
 from datetime import datetime, timedelta      # For setting token expiration times (Python Software Foundation, 2025)
 from dotenv import load_dotenv                # For loading secrets from .env file (PyPA, 2025)
@@ -28,8 +28,12 @@ import os                                     # For accessing environment variab
 # Load environment variables from the .env file (hides secrets from code) (PyPA, 2025)
 load_dotenv()
 
-# Initialize a password hashing contenxt (bcrypt as industry standard)(The Passlib Project, 2024)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Using Argon2 instead of bcrypt for password hashing.
+# Argon2 is the 2015 Password Hashing Competition winner (Biryukov et al., 2015)
+# and provides stronger resistance to GPU-based brute-force attacks.
+# This change also avoids bcrypt's 72-byte password length limit and backend version issues.
+# It is still one of the 4 recoomended password hashing but also the newest one (The Passlib Project, 2024)
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # Read JWT settings from .env variable (Davis, 2024)
 SECRET_KEY = os.getenv("JWT_SECRET")           # secret key used to sign tokens
@@ -73,6 +77,9 @@ def create_access_token(username: str) -> str:
     return token
 
 # References:
+#     Biryukov, A., Dinu, D., & Khovratovich, D. (2015). 
+#           Argon2: The memory-hard function for password hashing and proof-of-work applications. 
+#           Password Hashing Competition. https://password-hashing.net
 #     Davis, M. P. (2024). python-jose: JWT library for Python[Software repositiory].
 #           GitHub. https://github.com/mpdavis/python-jose
 #     The Passlib Project. (2024). Passlib: Password hashing framework for Python. 

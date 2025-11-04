@@ -11,7 +11,7 @@
 #   - Display success or error messages based on the backend response.
 #
 # Desing notes:
-#   - tkinter is pythons standard GUI library (Python Software Foundation)
+#   - tkinter is python's standard GUI library (Python Software Foundation, 2025a)
 #   - Widgets such as Label, Entry, and Button follow common usage patterns
 #     described in Tkinter tutorials and references (Shipman, 2013; TkDocs, 2024; Real Python, 2024)
 #   - The requests library is used to communicate with the HTTP API exposed by FastAPI
@@ -141,7 +141,7 @@ class Login(tk.Tk):
                 data = response.json()
 
                 # Get the "access_token" from the reply
-                # This token is a JSON web token (JWT) used to prove you are logged in 
+                # This token is a JSON web token (JWT) used to prove the user is logged in 
                 # (Davis, 2024)
                 access_token = data.get("access_token")
 
@@ -153,13 +153,13 @@ class Login(tk.Tk):
             elif response.status_code == status.HTTP_401_UNAUTHORIZED:
 
                 # GUI first looks for the detail field returned by FastAPI. 
-                # If it’s not there, it defaults to a generic message Login 
-                # failed so users still see feedback (Tiangolo, 2025)
+                # If it’s not there, it defaults to a generic message "Login 
+                # failed" so users still see feedback (Tiangolo, 2025)
                 error_message = response.json().get("detail", "Login failed")
                 self.status.config(text=error_message) 
 
             else: 
-                
+                # Handles other possible status codes, a catch all. 
                 messagebox.showerror(
                     "Error",
                     f"Unexpected response ({response.status_code}): {response.text}"
@@ -168,12 +168,19 @@ class Login(tk.Tk):
         
         # Handles cases like server down, no internet connection(Reitz & Chisamore, 2024)
         except requests.exceptions.RequestException as error:
+            messagebox.showerror(
+                "Connection Error",
+                f"Could not connect to the FastAPI backend:\n{error}"
+            )
             
 # Entry point: run Login GUI
 if __name__ == "__main__":
     Login().mainloop()
 
 '''
+This application was developed using open-source libraries and documentation .
+All code patterns and examples were adapted from the cited sources.
+
 References:
 Davis, M. P. (2024). python-jose: JWT library for Python. GitHub. 
     https://github.com/mpdavis/python-jose
@@ -181,7 +188,7 @@ Jose project team. (2024). PyJWT documentation. PyJWT.
     https://pyjwt.readthedocs.io/
 National Institute of Standards and Technology. (2020). Digital 
     identity guidelines: Authentication and lifecycle management 
-(NIST Special Publication 800-63B). U.S. Department of Commerce. 
+    (NIST Special Publication 800-63B). U.S. Department of Commerce. 
     https://doi.org/10.6028/NIST.SP.800-63b
 Python Software Foundation. (2025, October 29). tkinter — Python 
     interface to Tcl/Tk. In Python 3.13 documentation. 
@@ -194,6 +201,11 @@ Python Software Foundation. (2025, October 29). platform — Access
     https://docs.python.org/3/library/platform.html
 Reitz, K., & Chisamore, E. (2024). Requests: HTTP for humans. 
     Python Requests. https://requests.readthedocs.io/
+Shipman, J. W. (2013). Tkinter 8.5 reference: A GUI for Python. 
+    New Mexico Tech Computer Center. https://tkdocs.com/shipman/
+TkDocs. (2024). TkDocs tutorial: Basic widgets. https://tkdocs.com/tutorial/widgets.html    
 Tiangolo, S. (2025). FastAPI documentation. FastAPI. 
     https://fastapi.tiangolo.com/
+Real Python. (2024). Python GUI programming: Your Tkinter tutorial. 
+    Real Python. https://realpython.com/python-gui-tkinter/
 '''

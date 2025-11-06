@@ -2,7 +2,7 @@
 from pymongo import MongoClient
 
 # MongoDB Atlas connection string
-MONGO_URI = "YOUR MONGO URI"
+MONGO_URI = "mongodb+srv://tkuga:f24pRi9tCIeq3kgO@main.do8aa5o.mongodb.net/"
 DB_NAME = "bedbuddy"
 
 def get_db():

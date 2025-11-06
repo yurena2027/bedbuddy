@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, simpledialog, messagebox
 
-# import patient class for data handling
 from database.patient import Patient
-# import connection manager and db_op class
 from config.db_config import get_db
 from database.db_operation import Database
-# database = db_op class
+
 database = Database(get_db())
 
 MAX_BAYS = 6
@@ -35,8 +33,14 @@ class BedBuddy:
     # ---------------- Initial Data Loading Method ---------------- #
     def load_db_bays(self) -> dict[int, list[Patient]]:
         bays = [int(bay) for bay in database.db.list_collection_names() if bay.isdigit()]
+        priority_colors = {"High": "red", "Medium": "orange", "Low": "green"}
+
         for bay in bays:
             patients = database.get_bay_patients(bay)  # returns list[Patient]
+            # Assign color based on priority if not set
+            for patient in patients:
+                if not getattr(patient, "color", None):
+                    patient.color = priority_colors.get(getattr(patient, "priority", "Medium"), "deeppink2")
             self.bay_beds[bay] = patients
         return self.bay_beds
 
@@ -45,26 +49,21 @@ class BedBuddy:
         self.sidebar = tk.Frame(self.root, bg="lightgray", width=150)
         self.sidebar.pack(side="left", fill="y")
 
-        # ED Space Label
         myed_label = tk.Label(self.sidebar, text="ED Space", bg="lightgray", font=("Arial", 10, "bold"))
         myed_label.pack(anchor="w", padx=10, pady=(10, 0))
 
-        # Bay Buttons Frame
         self.bay_buttons_frame = tk.Frame(self.sidebar, bg="lightgray")
         self.bay_buttons_frame.pack(anchor="w", padx=10, pady=10, fill="x")
 
-        # Default Bay Buttons
         for i in range(1, len(self.bay_beds)+1):
             btn = tk.Button(self.bay_buttons_frame, text=f"- Bay {i}", bg="lightgray", relief="flat",
                             command=lambda num=i: self.show_bay(num))
             btn.pack(anchor="w", padx=5)
 
-        # Show All Patients Button
         self.patients_btn = tk.Button(self.sidebar, text="Show All Patients", relief="flat", bg="gray25", fg="white",
                                       command=self.show_all_bays)
         self.patients_btn.pack(anchor="w", padx=5, pady=5, fill="x")
 
-        # Add/Remove Bay Control Frame
         self.bay_control_frame = tk.Frame(self.sidebar, bd=1, relief="groove", bg="lightgray", padx=5, pady=5)
         self.bay_control_frame.pack(side="bottom", fill="x", pady=5)
 
@@ -72,11 +71,9 @@ class BedBuddy:
                                      command=self.add_bay)
         self.remove_bay_btn = tk.Button(self.bay_control_frame, text="- Remove Bottom Bay", bg="red", fg="white",
                                         relief="raised", command=self.remove_bay)
-
         self.add_bay_btn.pack(fill="x", pady=(0,5))
         self.remove_bay_btn.pack(fill="x", pady=(5,0))
 
-        # Bed Control Frame (for Add/Remove Bed in specific bay)
         self.bed_control_frame = tk.Frame(self.sidebar, bd=1, relief="groove", bg="lightgray", padx=5, pady=5)
         self.add_bed_btn = tk.Button(self.bed_control_frame, text="+ Add Bed", bg="lightgreen", relief="raised",
                                      command=self.add_bed)
@@ -92,7 +89,7 @@ class BedBuddy:
         patient_label = tk.Label(self.patient_frame, text="Patient View", font=("Arial", 12, "bold"))
         patient_label.pack(anchor="w", padx=5, pady=5)
 
-        columns = ("Name", "Location", "Patient Info")
+        columns = ("Name", "DOB", "Location", "Priority")  # Added "DOB"
         self.tree = ttk.Treeview(self.patient_frame, columns=columns, show="headings", height=10)
 
         for col in columns:
@@ -122,8 +119,9 @@ class BedBuddy:
             for patient in self.bay_beds[bay_num]:
                 if patient.presence:
                     patient_name = f"{patient.first_name} {patient.last_name}"
+                    patient_dob = patient.dob  # <-- Added
                     patient_location = f"Bay {patient.bay} / Bed {patient.bed}"
-                    self.tree.insert("", "end", values=(patient_name, patient_location, "..."))
+                    self.tree.insert("", "end", values=(patient_name, patient_dob, patient_location, patient.priority))
 
     def update_bed_info(self, curr_patient):
         for i, patient in enumerate(self.bay_beds[curr_patient.bay]):
@@ -131,6 +129,63 @@ class BedBuddy:
                 self.bay_beds[curr_patient.bay][i] = curr_patient
                 break
 
+    # ---------------- Add Patient Dialog ---------------- #
+    def add_patient_dialog(self, bay, bed):
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Add Patient to Bay {bay} Bed {bed}")
+        dialog.geometry("300x300")
+        dialog.grab_set()
+
+        tk.Label(dialog, text="First Name").pack(pady=2)
+        first_name_entry = tk.Entry(dialog)
+        first_name_entry.pack(pady=2)
+
+        tk.Label(dialog, text="Last Name").pack(pady=2)
+        last_name_entry = tk.Entry(dialog)
+        last_name_entry.pack(pady=2)
+
+        tk.Label(dialog, text="DOB (YYYY-MM-DD)").pack(pady=2)
+        dob_entry = tk.Entry(dialog)
+        dob_entry.pack(pady=2)
+
+        tk.Label(dialog, text="Priority").pack(pady=2)
+        priority_var = tk.StringVar(dialog)
+        priority_var.set("Medium")
+        tk.OptionMenu(dialog, priority_var, "High", "Medium", "Low").pack(pady=2)
+
+        def submit():
+            first_name = first_name_entry.get().strip()
+            last_name = last_name_entry.get().strip()
+            dob = dob_entry.get().strip()
+            priority = priority_var.get()
+
+            if not first_name or not last_name or not dob:
+                messagebox.showwarning("Missing Info", "Please fill in all fields")
+                return
+
+            # Color based on priority
+            priority_colors = {"High": "red", "Medium": "orange", "Low": "green"}
+            color = priority_colors.get(priority, "deeppink2")
+
+            self.update_bed_info(Patient(
+                first_name=first_name,
+                last_name=last_name,
+                dob=dob,
+                bay=bay,
+                bed=bed,
+                priority=priority,
+                color=color,
+                presence=True,
+                _id=None
+            ))
+
+            self.show_bay(self.current_bay)
+            self.refresh_tree(self.current_bay)
+            dialog.destroy()
+
+        tk.Button(dialog, text="Add Patient", command=submit).pack(pady=5)
+
+    # ---------------- Bed Methods ---------------- #
     def create_bed(self, frame, patient):
         f = tk.Frame(frame, width=70, height=90, bg="white", bd=1, relief="solid")
         f.pack_propagate(False)
@@ -155,27 +210,9 @@ class BedBuddy:
             )
 
             if curr_patient.presence:
-                remove = messagebox.askyesno("Remove Patient", f"Remove {patient.first_name} {patient.last_name} from {patient.bed}?")
-                if remove:
-                    self.update_bed_info(Patient.empty(curr_patient.bay, curr_patient.bed))
-                    self.show_bay(self.current_bay)
-                    self.refresh_tree(self.current_bay)
+                self.edit_patient_dialog(curr_patient)
             else:
-                pname_input = simpledialog.askstring("Add Patient", f"Enter patient name for {patient.bed}:")
-                if pname_input:
-                    self.update_bed_info(Patient(
-                        first_name=pname_input,
-                        last_name=pname_input,
-                        dob="",
-                        bay=curr_patient.bay,
-                        bed=curr_patient.bed,
-                        priority="",
-                        color="deeppink2",
-                        presence=True,
-                        _id=None
-                    ))
-                    self.show_bay(self.current_bay)
-                    self.refresh_tree(self.current_bay)
+                self.add_patient_dialog(curr_patient.bay, curr_patient.bed)
 
         f.bind("<Button-1>", on_click)
         label.bind("<Button-1>", on_click)
@@ -183,6 +220,59 @@ class BedBuddy:
             icon_lbl.bind("<Button-1>", on_click)
 
         return f
+
+    # ---------------- Edit Patient Dialog ---------------- #
+    def edit_patient_dialog(self, patient: Patient):
+        dialog = tk.Toplevel(self.root)
+        dialog.title(f"Edit Patient in Bay {patient.bay} Bed {patient.bed}")
+        dialog.geometry("300x350")
+        dialog.grab_set()
+
+        tk.Label(dialog, text="First Name").pack(pady=2)
+        first_name_entry = tk.Entry(dialog)
+        first_name_entry.insert(0, patient.first_name)
+        first_name_entry.pack(pady=2)
+
+        tk.Label(dialog, text="Last Name").pack(pady=2)
+        last_name_entry = tk.Entry(dialog)
+        last_name_entry.insert(0, patient.last_name)
+        last_name_entry.pack(pady=2)
+
+        tk.Label(dialog, text="DOB (YYYY-MM-DD)").pack(pady=2)
+        dob_entry = tk.Entry(dialog)
+        dob_entry.insert(0, patient.dob)
+        dob_entry.pack(pady=2)
+
+        tk.Label(dialog, text="Priority").pack(pady=2)
+        priority_var = tk.StringVar(dialog)
+        priority_var.set(patient.priority)
+        tk.OptionMenu(dialog, priority_var, "High", "Medium", "Low").pack(pady=2)
+
+        def save_changes():
+            patient.first_name = first_name_entry.get().strip()
+            patient.last_name = last_name_entry.get().strip()
+            patient.dob = dob_entry.get().strip()
+            patient.priority = priority_var.get()
+            # Update color based on priority
+            priority_colors = {"High": "red", "Medium": "orange", "Low": "green"}
+            patient.color = priority_colors.get(patient.priority, "deeppink2")
+
+            self.update_bed_info(patient)
+            self.show_bay(self.current_bay)
+            self.refresh_tree(self.current_bay)
+            dialog.destroy()
+
+        def remove_patient():
+            confirm = messagebox.askyesno("Remove Patient",
+                                          f"Remove {patient.first_name} {patient.last_name} from Bed {patient.bed}?")
+            if confirm:
+                self.update_bed_info(Patient.empty(patient.bay, patient.bed))
+                self.show_bay(self.current_bay)
+                self.refresh_tree(self.current_bay)
+                dialog.destroy()
+
+        tk.Button(dialog, text="Save Changes", command=save_changes, bg="lightblue").pack(pady=5)
+        tk.Button(dialog, text="Remove Patient", command=remove_patient, bg="salmon", fg="white").pack(pady=5)
 
     # ---------------- Bay Methods ---------------- #
     def show_bay(self, bay_number):

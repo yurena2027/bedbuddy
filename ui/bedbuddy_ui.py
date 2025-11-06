@@ -34,7 +34,7 @@ class BedBuddy:
 
     # ---------------- Initial Data Loading Method ---------------- #
     def load_db_bays(self) -> dict[int, list[Patient]]:
-        bays = [int(bay) for bay in database.db.list_collection_names()]
+        bays = [int(bay) for bay in database.db.list_collection_names() if bay.isdigit()]
         for bay in bays:
             patients = database.get_bay_patients(bay)  # returns list[Patient]
             self.bay_beds[bay] = patients

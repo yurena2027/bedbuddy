@@ -26,6 +26,14 @@ from fastapi import status # symbolic HTTP status codes for clarity (Tiangolo, 2
 import platform # Detect Operating System (Python Software Foundation, 2025c)
 import os       # File path utility (Python Software Foundation, 2025b)
 import requests # For HTTP requests to FastAPI backend (Reitz & Chisamore, 2024)
+from ui import BedBuddy # BedBuddy main application window
+# 'sys' is Python's built-in system module that provides access to the interpreter’s runtime environment
+# Used here to modify sys.path for dynamic module imports (Python Software Foundation, 2025)
+import sys
+
+# Dynamically add project root to the import path so UI modules load correctly
+# (Python Software Foundation, 2024)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ------------------
 # Login Window Class
@@ -40,7 +48,7 @@ class Login(tk.Tk):
         self.geometry("400x350")              # Set window size
         self.resizable(False,False)           # Disable resizing
 
-        # Cross-platform window icon handling (Python Software Foundation, 2025a)
+        # Handles icons Cross-platform window (Python Software Foundation, 2025a)
         try:
             if platform.system() == "Windows":
                 # Windows prefers .ico format
@@ -51,7 +59,7 @@ class Login(tk.Tk):
         except Exception as e:
             print("Icon not loaded:", e)
 
-        # Create a frame with padding to hold the widgets
+        # Create a frame with padding to hold the widgets (TkDocs, 2024)
         frame = ttk.Frame(self, padding=16)
         # Expand to fill the window
         frame.pack(fill="both", expand=True)  
@@ -59,7 +67,7 @@ class Login(tk.Tk):
         # Get absolute path to current script's folder
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-        # Logo clickable test
+        # Load clickable logo (TkDocs, 2024)
         try:
             self.logo_img = PhotoImage(file=os.path.join(BASE_DIR, "BBLogo.png")) # load png logo
             self.logo_img = self.logo_img.subsample(8, 8)  # shrink by factor of 8
@@ -196,9 +204,13 @@ Python Software Foundation. (2025, October 29). tkinter — Python
 Python Software Foundation. (2025, October 29). os — Miscellaneous 
     operating system interfaces. In Python 3.13 documentation. 
     https://docs.python.org/3/library/os.html
+Python Software Foundation. (2024). Modules and packages — Import system. 
+    In The Python 3.13 documentation. https://docs.python.org/3/tutorial/modules.html
 Python Software Foundation. (2025, October 29). platform — Access 
     to underlying platform’s identifying data. In Python 3.13 documentation. 
     https://docs.python.org/3/library/platform.html
+Python Software Foundation. (2025). sys — System-specific parameters and functions. 
+    In Python 3.13 documentation. https://docs.python.org/3/library/sys.html
 Reitz, K., & Chisamore, E. (2024). Requests: HTTP for humans. 
     Python Requests. https://requests.readthedocs.io/
 Shipman, J. W. (2013). Tkinter 8.5 reference: A GUI for Python. 

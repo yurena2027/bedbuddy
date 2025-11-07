@@ -18,22 +18,23 @@
 #     (Python Software Foundation, 2024b; Tiangolo, 2024)
 #   
 # -----Imports-------
+# 'sys' is Python's built-in system module that provides access to the interpreter’s runtime environment
+# Used here to modify sys.path for dynamic module imports (Python Software Foundation, 2025)
+import sys
+import os       # File path utility (Python Software Foundation, 2025b)
 # Tkinter core library for GUI 
+
+# Dynamically add project root to the import path so UI modules load correctly
+# (Python Software Foundation, 2024)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import tkinter as tk
 # ttk for themed widgets and messagebox for pop-ups
 from tkinter import ttk, messagebox, PhotoImage
 from fastapi import status # symbolic HTTP status codes for clarity (Tiangolo, 2025)
 import platform # Detect Operating System (Python Software Foundation, 2025c)
-import os       # File path utility (Python Software Foundation, 2025b)
 import requests # For HTTP requests to FastAPI backend (Reitz & Chisamore, 2024)
 from ui import BedBuddy # BedBuddy main application window
-# 'sys' is Python's built-in system module that provides access to the interpreter’s runtime environment
-# Used here to modify sys.path for dynamic module imports (Python Software Foundation, 2025)
-import sys
-
-# Dynamically add project root to the import path so UI modules load correctly
-# (Python Software Foundation, 2024)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # ------------------
 # Login Window Class
@@ -157,6 +158,14 @@ class Login(tk.Tk):
                 messagebox.showinfo("Success", "Login successful.")
                 # Close the login window
                 self.destroy()
+
+                # Launch the BedBuddy main interface (after successful login)
+                try:
+                    app = BedBuddy() # Create an instance of main UI
+                    app.run()        # Start BedBuddy interface
+                
+                except Exception as e:
+                    messagebox.showerror("Error", f"Unable to launch BedBuddy UI")
             
             elif response.status_code == status.HTTP_401_UNAUTHORIZED:
 

@@ -58,7 +58,7 @@ The endpoints you can test are:
   /auth/login            Log in existing user     Returns 200 ok and a JWT token
   /auth/login            Invalid credentials      Returns 401 Unauthorized with "Failed Login"
 
-***Can we put screenshots***
+<img width="544" height="751" alt="Screenshot 2025-11-08 at 19 43 34" src="https://github.com/user-attachments/assets/aabb1772-c7cc-444b-b464-9f6c45d16580" />
 
 Step 3 - Run the Tkinter Login app
 Open a new terminal while keeping Uvicorn running:

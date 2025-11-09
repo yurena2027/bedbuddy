@@ -10,7 +10,7 @@
 #   - Send credentials to the FastAPI backend for verification
 #   - Display success or error messages based on the backend response.
 #
-# Desing notes:
+# Design notes:
 #   - tkinter is python's standard GUI library (Python Software Foundation, 2025a)
 #   - Widgets such as Label, Entry, and Button follow common usage patterns
 #     described in Tkinter tutorials and references (Shipman, 2013; TkDocs, 2024; Real Python, 2024)

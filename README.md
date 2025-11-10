@@ -52,11 +52,24 @@ Uvicorn running on http://127.0.0.1:8000
 Step 2: Open Swagger UI
 Go to http://127.0.0.1:8000/docs
 FastAPI automatically generates a test interface where you can try both endpoints.
+
+<img width="185" height="165" alt="image" src="https://github.com/user-attachments/assets/ac81b3b1-393c-4290-9d85-af21a831b4de" />
+
 The endpoints you can test are:
 
   /auth/register         Register a new user      Returns 201 Created and "msg: User registered successfully"
+
+<img width="186" height="105" alt="image" src="https://github.com/user-attachments/assets/4760b786-599a-45f0-acf3-6b734d69b190" />
+
+  
   /auth/login            Log in existing user     Returns 200 ok and a JWT token
+
+<img width="203" height="109" alt="image" src="https://github.com/user-attachments/assets/351a1970-ddef-419b-8add-2a1022ebe8e2" />
+
   /auth/login            Invalid credentials      Returns 401 Unauthorized with "Failed Login"
+
+<img width="170" height="161" alt="image" src="https://github.com/user-attachments/assets/ce61002d-a659-467c-a37e-8afcaf4d7ed7" />
+
 
 <img width="544" height="751" alt="Screenshot 2025-11-08 at 19 43 34" src="https://github.com/user-attachments/assets/aabb1772-c7cc-444b-b464-9f6c45d16580" />
 
@@ -65,12 +78,28 @@ Open a new terminal while keeping Uvicorn running:
 
   python LoginApp.py
 
-  Enter the same credentials used in your registration test.
 
-  ***Working on this Phase 2 today to ensure this actually works with no bugs***
+<img width="265" height="245" alt="image" src="https://github.com/user-attachments/assets/29edeb94-4179-4f84-9b2e-1b785bff3538" />
+
+Enter the same credentials used in your registration test.
+
+"Login successful"
+<img width="151" height="143" alt="image" src="https://github.com/user-attachments/assets/e5f81c45-059e-4a04-bd8f-5b1b0c1febae" />
+
+
+"Invalid username or password"
+<img width="400" height="380" alt="Screenshot 2025-11-06 at 23 15 28" src="https://github.com/user-attachments/assets/78f962ff-6a2d-4059-a4a8-abf383d4ca74" />
+
 
 Step 4 - Verify Database update 
 * This is phase 3 to be completed after frontend integration testing.
+
+MongoDB Database user registration verification with password hasing
+<img width="255" height="129" alt="image" src="https://github.com/user-attachments/assets/c24e4a65-4c1f-4393-9510-9bf0a411263f" />
+
+MongoDB Database user registration verification (closer look)
+<img width="468" height="102" alt="image" src="https://github.com/user-attachments/assets/175db301-de78-4491-b77c-faaecd7bca9b" />
+
 
 # Summary:
   * Passwords are never stored in plain text

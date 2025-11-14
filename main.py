@@ -2,9 +2,6 @@
 
 # This module initalizes the system by: 
 #   1. Retrieves patient records from the MongoDB Atalas database
-
-from ui import BedBuddy
-from database.db_operation import get_all_patients
 #   2. Displays basic patient info
 #   3. Launches the BedBuddy graphical interface
 #--------------
@@ -28,22 +25,11 @@ from database.db_operation import get_all_patients
 # - Sommerville, I. (2016). Software Engineering (10th ed.). Pearson Education.
 # ====================================================================================
 
-from ui import BedBuddy
-from database.db_operation import get_all_patients
 
-# Database retrival
-patients = get_all_patients()
-
-# Loop through each patient record and print key details
-for patient in patients:
-    print(f"Name: {patient['first_name']} {patient['last_name']}")
-    print(f"\tLocation: {patient['bed']}")
-    print(f"\tDOB: {patient['dob']}")
-    print(f"\tPriority: {patient['priority']}")
+from ui.bedbuddy_ui import BedBuddy
 
 if __name__ == "__main__":
+
     app = BedBuddy()
     app.run()
-
-
 

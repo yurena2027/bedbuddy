@@ -59,7 +59,7 @@ In your terminal:
   
   cd backend //ensure you are in this folder
   
-  uvicorn auth_appi:app --reload
+  uvicorn auth_api:app --reload
 
 You should see:
 

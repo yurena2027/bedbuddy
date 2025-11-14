@@ -1,11 +1,161 @@
-# bedbuddy
-ER desktop application tracking patients and beds
+# BedBuddy: ER Bed Management System
+# Authors: BedBuddy Development Team (Fall 2025, UCCS CS 3300)
+# Last Updated: 8 November 2025
+
+The BedBuddy is a prototype desktop application built for emergency room settings to track patients and bed availability. 
+It combines a graphical interface created with Tkinter and a FastAPI backend that connects to a MongoDB Atlas cloud database. 
+
+The application demonstrates secure login authentication, patient management, and bed assignment features using modular,
+testable components.
+
 <br>
-# requirements
-<b>pymongo</b><br>
-tkinter<br>
-ttk
+# System Requirements:
+Before running, ensure you have the following:
+1. Python 3.11 - 3.13 installed
+2. MongoDB Atlas account (Database)
+3. A working internet connection (to access Atlas cluster)
+
+# Python Dependencies:
+pip install fastapi uvicorn motor passlib[argon2] python-jose[cryptography] python-dotenv requests
+
+# Packages used:
+* FastAPI - backend framework (Tiangolo, 2025)
+* Motor - async MongoDB driver (MongoDB Inc., 2025)
+* passlib[argon2] - secure password hashing (The Passlib Project, 2024)
+* Python-jose - JWT token generation (Davis, 2024)
+* Python-dotenv - for loading environment variables from local machine
+* requests - sends HTTP POST requests from GUI Tkinter app to communicate with FastAPI server (Reitz & Chisamore, 2024)
+* tkinter, ttk - Python's built-in GUI toolkit (Python Software Foundation, 2025)
+
+# Configuration:
+Create a .env file in the /backend directory with your own credentials to include:
+
+MONGO_URI=mongodb+srv://<your-cluster>
+DB_NAME=bedbuddy
+JWT_SECRET=<your-secret-key>
+JWT_ALGORITHM=HS256
+
+# How to test the code:
+
+Step 1 - Start the Backend server
+
+In your terminal:
+  cd backend (ensure you are in this folder)
+  uvicorn auth_appi:app --reload
+
+You should see:
+Uvicorn running on http://127.0.0.1:8000
+
+<img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
+
+
+Step 2: Open Swagger UI
+Go to http://127.0.0.1:8000/docs
+FastAPI automatically generates a test interface where you can try both endpoints.
+
+<img width="185" height="165" alt="image" src="https://github.com/user-attachments/assets/ac81b3b1-393c-4290-9d85-af21a831b4de" />
+
+The endpoints you can test are:
+
+  /auth/register         Register a new user      Returns 201 Created and "msg: User registered successfully"
+
+<img width="186" height="105" alt="image" src="https://github.com/user-attachments/assets/4760b786-599a-45f0-acf3-6b734d69b190" />
+
+  
+  /auth/login            Log in existing user     Returns 200 ok and a JWT token
+
+<img width="203" height="109" alt="image" src="https://github.com/user-attachments/assets/351a1970-ddef-419b-8add-2a1022ebe8e2" />
+
+  /auth/login            Invalid credentials      Returns 401 Unauthorized with "Failed Login"
+
+<img width="170" height="161" alt="image" src="https://github.com/user-attachments/assets/ce61002d-a659-467c-a37e-8afcaf4d7ed7" />
+
+
+<img width="544" height="751" alt="Screenshot 2025-11-08 at 19 43 34" src="https://github.com/user-attachments/assets/aabb1772-c7cc-444b-b464-9f6c45d16580" />
+
+Step 3 - Run the Tkinter Login app
+Open a new terminal while keeping Uvicorn running:
+
+  python LoginApp.py
+
+
+<img width="265" height="245" alt="image" src="https://github.com/user-attachments/assets/29edeb94-4179-4f84-9b2e-1b785bff3538" />
+
+Enter the same credentials used in your registration test.
+
+"Login successful"
+<img width="151" height="143" alt="image" src="https://github.com/user-attachments/assets/e5f81c45-059e-4a04-bd8f-5b1b0c1febae" />
+
+
+"Invalid username or password"
+<img width="400" height="380" alt="Screenshot 2025-11-06 at 23 15 28" src="https://github.com/user-attachments/assets/78f962ff-6a2d-4059-a4a8-abf383d4ca74" />
+
+
+Step 4 - Verify Database update 
+* This is phase 3 to be completed after frontend integration testing.
+
+MongoDB Database user registration verification with password hasing
+<img width="255" height="129" alt="image" src="https://github.com/user-attachments/assets/c24e4a65-4c1f-4393-9510-9bf0a411263f" />
+
+MongoDB Database user registration verification (closer look)
+<img width="468" height="102" alt="image" src="https://github.com/user-attachments/assets/175db301-de78-4491-b77c-faaecd7bca9b" />
+
+
+# Summary:
+  * Passwords are never stored in plain text
+  * Each password is hashed using Argon2
+  * The backend issues JWT tokens signed with the secret key defined in .env
+  * Tokens are time-limited and must be reissued upon expiration
+  * In a real healthcare setting, authentication and data privacy would comply
+  with HIPAA / NIST SP 800-63B. The BedBuddy project incorporates this principle
+  for demonstration and best practice learning. 
+
+# Backend Code Overview:
+
+auth_api.py
+
+It defines two endpoints:
+  * POST /auth/register - creates a user in MongoDB after hashing the password
+  * POST /auth/login - verifies credentials and returns a JWT token
+
+secrets.py
+
+This code implements:
+  * hash_password() and verify_password*) using Lasslib Argon2
+  * create_access_token() using python-jose
+  * Loads keys/secrets from .env using python-dotenv
+
+
+
 <br>
 # usage
 Edit the **MONGO_URI** variable in **config/db_config.py**<br>
 with your real MongoDB URI.
+
+
+# References:
+
+Davis, M. P. (2024). python-jose: JWT library for Python. GitHub. https://github.com/mpdavis/python-jose
+
+MongoDB Inc. (2025). Motor: Asynchronous Python driver for MongoDB. https://motor.readthedocs.io
+
+TkDocs. (2024). Tkinter Tutorial. https://tkdocs.com
+
+The Passlib Project. (2024). Passlib: Password hashing framework for Python. https://passlib.readthedocs.io
+
+Tiangolo, S. (2025). FastAPI documentation. https://fastapi.tiangolo.com
+
+Python Software Foundation. (2025). tkinter — Python interface to Tcl/Tk. https://docs.python.org/3/library/tkinter.html
+
+Python Software Foundation. (2025). os — Miscellaneous operating system interfaces. https://docs.python.org/3/library/os.html
+
+Python Software Foundation. (2025). platform — Access to underlying platform data. https://docs.python.org/3/library/platform.html
+
+Real Python. (2024). Python Tkinter Tutorial. https://realpython.com/python-gui-tkinter/
+
+Reitz, K., & Chisamore, E. (2024). Requests: HTTP for Humans. https://requests.readthedocs.io
+
+National Institute of Standards and Technology. (2020). Digital Identity Guidelines: Authentication and Lifecycle Management (NIST SP 800-63B). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-63b
+
+Sommerville, I. (2016). Software Engineering (10th ed.). Pearson Education.
+

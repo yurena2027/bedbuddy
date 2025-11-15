@@ -10,7 +10,7 @@
 #   - Send credentials to the FastAPI backend for verification
 #   - Display success or error messages based on the backend response.
 #
-# Desing notes:
+# Design notes:
 #   - tkinter is python's standard GUI library (Python Software Foundation, 2025a)
 #   - Widgets such as Label, Entry, and Button follow common usage patterns
 #     described in Tkinter tutorials and references (Shipman, 2013; TkDocs, 2024; Real Python, 2024)
@@ -26,7 +26,7 @@ import os       # File path utility (Python Software Foundation, 2025b)
 
 # Add the bedbuddy root to the Python import path. This will let LoginApp.py
 # import ui modules even when the program is launched from another directory.
-# (Python Software Foundation, 2024; ZohourianShahzadi, 2025, Lec. 7-8))
+# (Python Software Foundation, 2024; ZohourianShahzadi, 2025, Lec. 7-8)
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
@@ -84,7 +84,7 @@ class Login(tk.Tk):
                 self.iconbitmap(asset_path("BBLogo.ico"))
             else:
                 # macOS/Linux fallback (PNG)
-                self.iconphoto(False, PhotoImage(file=asset_path("BBLogo.png"))
+                self.iconphoto(False, PhotoImage(file=asset_path("BBLogo.png")))
         except Exception as e:
             print("Icon not loaded:", e)
 
@@ -108,7 +108,7 @@ class Login(tk.Tk):
         except Exception as e:
             print("Logo not found", e)
 
-         # Username label and entry field
+        # Username label and entry field
         ttk.Label(frame, text="username").grid(row=1, column=0, sticky="w")
         self.e_user = ttk.Entry(frame, width=26)  # Input box for username
         self.e_user.grid(row=1, column=1, pady=4)
@@ -191,6 +191,7 @@ class Login(tk.Tk):
                 
                 except Exception as e:
                     messagebox.showerror("Error", f"Unable to launch BedBuddy UI")
+                    raise # testing error
             
             elif response.status_code == status.HTTP_401_UNAUTHORIZED:
 

@@ -1,6 +1,6 @@
 # BedBuddy: ER Bed Management System
 # Authors: BedBuddy Development Team (Fall 2025, UCCS CS 3300)
-# Last Updated: 14 November 2025
+# Last Updated: 15 November 2025
 
 The BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability. It combines a Tkinter graphical interface created with a FastAPI backend that connects to a MongoDB Atlas cloud database. The application demonstrates secure login authentication, patient management, and bed assignment features using modular, testable components that can be expanded into a full system.
 
@@ -10,9 +10,6 @@ Before running, ensure you have the following:
 1. Python 3.11 - 3.13 installed
 2. MongoDB Atlas account (Database)
 3. A working internet connection (to access Atlas cluster)
-
-# Python Dependencies:
-pip install fastapi uvicorn motor passlib[argon2] python-jose[cryptography] python-dotenv requests
 
 # Packages used:
 * FastAPI - backend framework (Tiangolo, 2025)
@@ -51,17 +48,41 @@ Open the .env file in your backend directory and add the following line:
 
 JWT_SECRET= <your generated JWT Key>
 
-# How to test the backend:
+# Installing Python Dependencies:
+You can install everything at once with the following command in terminal:
+pip install -r requirements.txt
 
-Step 1 - Start the FastAPI backend server
+The file includes:
+
+   fastapi
+   uvicorn
+   motor
+   passlib[argon2]
+   python-jose[cryptography]
+   python-dotenv
+   requests
+   pymongo
+   argon2-cffi
+
+These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
+
+This approach is if you want to install it by name:
+pip install fastapi uvicorn motor passlib[argon2] python-jose[cryptography] python-dotenv requests
+
+
+# Running the backend:
+
+Step 1 - Open a terminal and go to the backend folder.
 
 In your terminal:
   
   cd backend //ensure you are in this folder
   
+Step 2. Start the FastAPI server
+
   uvicorn auth_api:app --reload
 
-You should see:
+If it starts properoly, you should see:
 
 Uvicorn running on http://127.0.0.1:8000
 
@@ -75,7 +96,7 @@ FastAPI automatically generates a test interface where you can try both endpoint
 
 <img width="185" height="165" alt="image" src="https://github.com/user-attachments/assets/ac81b3b1-393c-4290-9d85-af21a831b4de" />
 
-The endpoints you can test are:
+From here, you can test:
 
   /auth/register         Register a new user      Returns 201 Created and "msg: User registered successfully"
 
@@ -93,28 +114,28 @@ The endpoints you can test are:
 
 <img width="544" height="751" alt="Screenshot 2025-11-08 at 19 43 34" src="https://github.com/user-attachments/assets/aabb1772-c7cc-444b-b464-9f6c45d16580" />
 
-Step 3 - Run the Tkinter Login app
-Open a second terminal while keeping Uvicorn running:
+# Running the Tkinter Login App
+
+Step 1 - Open a second terminal while keeping Uvicorn running:
 
   python LoginApp.py
 
 
 <img width="265" height="245" alt="image" src="https://github.com/user-attachments/assets/29edeb94-4179-4f84-9b2e-1b785bff3538" />
 
-Enter the same credentials used in your registration test.
+Step 2 - Enter the same credentials used in your registration test.
 
-"Login successful"
+   "Login successful"
 <img width="151" height="143" alt="image" src="https://github.com/user-attachments/assets/e5f81c45-059e-4a04-bd8f-5b1b0c1febae" />
 
 
-"Invalid username or password"
+   "Invalid username or password"
 <img width="400" height="380" alt="Screenshot 2025-11-06 at 23 15 28" src="https://github.com/user-attachments/assets/78f962ff-6a2d-4059-a4a8-abf383d4ca74" />
 
 
-Step 4 - Verify Database update 
-* This is phase 3 to be completed after frontend integration testing.
+   Step 4 - Verify Database update 
 
-MongoDB Database user registration verification with password hasing
+MongoDB Database user registration verification with password hashing
 <img width="255" height="129" alt="image" src="https://github.com/user-attachments/assets/c24e4a65-4c1f-4393-9510-9bf0a411263f" />
 
 MongoDB Database user registration verification (closer look)

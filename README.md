@@ -6,10 +6,13 @@ The BedBuddy is a prototype desktop application built for emergency room setting
 
 # System Requirements:
 Before running, ensure you have the following:
-1. Python 3.11 - 3.13 installed
-2. MongoDB Atlas account (Database)
-3. A working internet connection (to access Atlas cluster)
-4. Git account
+1. Python 3.11 - 3.12 installed
+2. MongoDB Atlas account (for cloud Database access)
+3. A working internet connection
+4. Git 
+
+# Python version
+Bedbuddy has been tested on Python 3.11 and 3.12, inside a virtual environment to avoid dependency conflicts. During testing, there were dependency conflicts with Python version 3.13 and above. Please install Python 3.11.x or Python 3.12.x for full compatibility. 
 
 # Packages used:
 * FastAPI - backend framework (Tiangolo, 2025)
@@ -21,25 +24,28 @@ Before running, ensure you have the following:
 * tkinter, ttk - Python's built-in GUI toolkit (Python Software Foundation, 2025)
 
 # Setup Guide (macOS & Windows)
-This guide is intended to prepare the computer to run BedBuddy locally. We use this setup to practice proper security and authentication. Keeping credentials in a local .env file instead of hard-coding them into the code or terminal, protects the database and follows real-world development standards (OWASP Foundation, 2023). 
+This guide is intended to prepare the computer to run BedBuddy locally. We use a .env file instead of hard-coding credentials to follow real-world security practices. This approach helps prevent accidental exposure and follows common software security guidelines (OWASP Foundation, 2023). 
 
 1. Clone the repository
 
-git clone https://github.com/<your-team-repo>/bedbuddy.git
+   git clone https://github.com/<your-team-repo>/bedbuddy.git
 
-cd bedbuddy
+   cd bedbuddy
 
-2. Create and activate a virtual environment (Optional, but recommended)
+2. Create and activate a virtual environment (Recommended)
+This ensures everyone uses the same Python version and avoids dependency issues. During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above. The steps below will create a virtual environment with Python 3.12 version.
 
 ## macOS
 
-python3 -m venv bedbuddy
-source bedbuddy/bin/activate
+   python3.12 -m venv bedbuddy
+   
+   source bedbuddy/bin/activate
 
-Windows (PowerShell)
+## Windows (PowerShell)
 
-py -3 -m venv bedbuddy
-.\bedbuddy\Scripts\activate
+   py -3.12 -m venv bedbuddy
+   
+   .\bedbuddy\Scripts\activate
 
 3. Install project dependencies.
 These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.

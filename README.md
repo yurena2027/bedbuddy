@@ -31,7 +31,7 @@ cd bedbuddy
 
 2. Create and activate a virtual environment (Optional, but recommended)
 
-macOS
+## macOS
 
 python3 -m venv bedbuddy
 source bedbuddy/bin/activate

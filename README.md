@@ -64,7 +64,7 @@ The file includes:
    pymongo
    argon2-cffi
 
-4. Create your personal .env file (not committed to Git because .gitignore has it on it)
+4. Create your personal .env file (not committed to Git)
 
 Inside the backend/folder
 
@@ -82,7 +82,7 @@ The command uses Python’s built-in os.urandom function, to generate 24 random 
 
    5.1	Copy the generated key, 
 
-   Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
+      Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
 
    5.2 Paste it into your .env file. The idea is to keep your key safe and private.
 

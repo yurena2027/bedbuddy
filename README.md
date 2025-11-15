@@ -4,12 +4,12 @@
 
 The BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability. It combines a Tkinter graphical interface created with a FastAPI backend that connects to a MongoDB Atlas cloud database. The application demonstrates secure login authentication, patient management, and bed assignment features using modular, testable components that can be expanded into a full system.
 
-<br>
 # System Requirements:
 Before running, ensure you have the following:
 1. Python 3.11 - 3.13 installed
 2. MongoDB Atlas account (Database)
 3. A working internet connection (to access Atlas cluster)
+4. Git account
 
 # Packages used:
 * FastAPI - backend framework (Tiangolo, 2025)
@@ -20,36 +20,29 @@ Before running, ensure you have the following:
 * requests - sends HTTP POST requests from Tkinter GUI app to communicate with FastAPI server (Reitz & Chisamore, 2024)
 * tkinter, ttk - Python's built-in GUI toolkit (Python Software Foundation, 2025)
 
-# Configuration:
-Create a .env file inside the /backend folder with your own credentials.
+# Setup Guide (macOS & Windows)
+This guide is intended to prepare the computer to run BedBuddy locally. We use this setup to practice proper security and authentication, similar to life applications would use. Keeping credentials in a .env file instead of hard-coding them protects the database and follows real-world development standards (OWASP Foundation, 2023). 
 
-MONGO_URI=mongodb+srv://<your-cluster>
-DB_NAME=bedbuddy
-JWT_SECRET=<your-secret-key>
-JWT_ALGORITHM=HS256
+1. Clone the repository
 
-# How to create a JWT Secret Key
-A JWT secret key is a secure long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025). There is an easy approach using the terminal to generate one.
+git clone https://github.com/<your-team-repo>/bedbuddy.git
+cd bedbuddy
 
-1.	Open your terminal
-   
-3.	Generate a secret key with the following commands
+2. Create and activate a virtual environment (Optional, but recommended)
 
-python -c 'import os; print(os.urandom(24).hex())'
+macOS
 
-This command uses Python’s built-in os.urandom function, to generate 24 random bytes and converts them into a hexadecimal string. This approach is commonly used to generate secret keys and other security sensitive data (Python Software Foundation, 2025).
+python3 -m venv bedbuddy
+source bedbuddy/bin/activate
 
-3.	Copy the generated key, you will need to paste it into your .env file. The idea is to keep your key safe and private.
+Windows (PowerShell)
 
-Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
+py -3 -m venv bedbuddy
+.\bedbuddy\Scripts\activate
 
-4.	Add it to your .env file
-Open the .env file in your backend directory and add the following line:
+3. Install project dependencies.
+These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
 
-JWT_SECRET= <your generated JWT Key>
-
-# Installing Python Dependencies:
-You can install everything at once with the following command in terminal:
 pip install -r requirements.txt
 
 The file includes:
@@ -64,11 +57,27 @@ The file includes:
    pymongo
    argon2-cffi
 
-These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
+4. Create your personal .env file (not committed to Git because .gitignore has it on it)
 
-This approach is if you want to install it by name:
-pip install fastapi uvicorn motor passlib[argon2] python-jose[cryptography] python-dotenv requests
+Inside the backend/folder
 
+MONGO_URI=<your MongoDB Atlas connection string>
+DB_NAME=bedbuddy
+JWT_SECRET=<your generated key>
+JWT_ALGORITHM=HS256
+
+5. Generate your own JWT secret key
+A JWT secret key is a secure, long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025). There is an easy approach using the terminal to generate one.
+
+python -c "import os; print(os.urandom(24).hex())"
+
+The command uses Python’s built-in os.urandom function, to generate 24 random bytes and converts them into a hexadecimal string. This approach is commonly used to generate secret keys and other security sensitive data (Python Software Foundation, 2025).
+
+   5.1	Copy the generated key, 
+
+   Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
+
+   5.2 Paste it into your .env file. The idea is to keep your key safe and private.
 
 # Running the backend:
 
@@ -182,6 +191,8 @@ TkDocs. (2024). Tkinter Tutorial. https://tkdocs.com
 The Passlib Project. (2024). Passlib: Password hashing framework for Python. https://passlib.readthedocs.io
 
 Tiangolo, S. (2025). FastAPI documentation. https://fastapi.tiangolo.com
+
+OWASP Foundation. (2023). OWASP cheat sheet series: Secrets management. https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
 
 Python Software Foundation. (2025). tkinter — Python interface to Tcl/Tk. https://docs.python.org/3/library/tkinter.html
 

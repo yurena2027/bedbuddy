@@ -21,11 +21,12 @@ Before running, ensure you have the following:
 * tkinter, ttk - Python's built-in GUI toolkit (Python Software Foundation, 2025)
 
 # Setup Guide (macOS & Windows)
-This guide is intended to prepare the computer to run BedBuddy locally. We use this setup to practice proper security and authentication, similar to life applications would use. Keeping credentials in a .env file instead of hard-coding them protects the database and follows real-world development standards (OWASP Foundation, 2023). 
+This guide is intended to prepare the computer to run BedBuddy locally. We use this setup to practice proper security and authentication. Keeping credentials in a local .env file instead of hard-coding them into the code or terminal, protects the database and follows real-world development standards (OWASP Foundation, 2023). 
 
 1. Clone the repository
 
 git clone https://github.com/<your-team-repo>/bedbuddy.git
+
 cd bedbuddy
 
 2. Create and activate a virtual environment (Optional, but recommended)

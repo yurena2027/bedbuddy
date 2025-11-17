@@ -1,6 +1,6 @@
 # BedBuddy: ER Bed Management System
 # Authors: BedBuddy Development Team (Fall 2025, UCCS CS 3300)
-# Last Updated: 15 November 2025
+# Last Updated: 17 November 2025
 
 The BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability. It combines a Tkinter graphical interface created with a FastAPI backend that connects to a MongoDB Atlas cloud database. The application demonstrates secure login authentication, patient management, and bed assignment features using modular, testable components that can be expanded into a full system.
 
@@ -168,6 +168,7 @@ MongoDB Database user registration verification (closer look)
 # Backend Code Overview:
 
 auth_api.py
+
 Implements two endpoints:
   * POST /auth/register - creates a user in MongoDB after hashing the password
   * POST /auth/login - verifies credentials and returns a JWT token
@@ -175,7 +176,7 @@ Implements two endpoints:
 secrets.py
 
 This code implements:
-  * hash_password() and verify_password*) using Lasslib Argon2
+  * hash_password() and verify_password() using Passlib Argon2
   * create_access_token() using python-jose
   * Loads keys/secrets from .env using python-dotenv
 

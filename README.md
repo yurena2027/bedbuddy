@@ -36,18 +36,28 @@ This guide is intended to prepare the computer to run BedBuddy locally. We use a
 This ensures everyone uses the same Python version and avoids dependency issues. During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above. The steps below will create a virtual environment with Python 3.12 version.
 
 ## macOS
+https://www.python.org/downloads/macos/      macOS python download versions
+
+The first command tells Python 3.12 to create a new isolated environment named "bedbuddy". You can modify the name of your virtual environment or the python version. 
 
    python3.12 -m venv bedbuddy
-   
+
+The second command activates that environment so you can install dependencies without affetion your system. 
+
    source bedbuddy/bin/activate
 
 ## Windows (PowerShell)
 
+The first command tells Python 3.12 to create a new isolated environment named "bedbuddy". You can modify the name of your virtual environment or the python version. 
+
    py -3.12 -m venv bedbuddy
+
+The second command activates that environment so you can install dependencies without affetion your system. 
    
    .\bedbuddy\Scripts\activate
 
-3. Install project dependencies.
+3. Install project dependencies (ensure you are inside backend directory)
+
 These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
 
 pip install -r requirements.txt
@@ -73,7 +83,7 @@ DB_NAME=bedbuddy
 JWT_SECRET=<your generated key>
 JWT_ALGORITHM=HS256
 
-5. Generate your own JWT secret key
+5. Generate your own JWT secret key (OPTIONAL)
 A JWT secret key is a secure, long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025). There is an easy approach using the terminal to generate one.
 
 python -c "import os; print(os.urandom(24).hex())"

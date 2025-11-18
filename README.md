@@ -138,8 +138,6 @@ From here, you can test:
 <img width="170" height="161" alt="image" src="https://github.com/user-attachments/assets/ce61002d-a659-467c-a37e-8afcaf4d7ed7" />
 
 
-<img width="544" height="751" alt="Screenshot 2025-11-08 at 19 43 34" src="https://github.com/user-attachments/assets/aabb1772-c7cc-444b-b464-9f6c45d16580" />
-
 # Running the Tkinter Login App
 
 Step 1 - Open a second terminal while keeping Uvicorn running:

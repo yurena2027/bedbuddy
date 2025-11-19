@@ -35,7 +35,6 @@ This approach helps prevent accidental exposure and follows common software secu
 
 1. Clone the repository
 
-    <br>
     `git clone https://github.com/<your-team-repo>/bedbuddy.git`
     <br>
     `cd bedbuddy`

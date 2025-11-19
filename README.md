@@ -119,15 +119,13 @@ This approach helps prevent accidental exposure and follows common software secu
 `cd backend //ensure you are in this folder`
 
 2. Start the FastAPI server.
-<br>
-`uvicorn auth_api:app --reload`
+
+    `uvicorn auth_api:app --reload`
 
     You should see:
-    <br>
     `Uvicorn running on http://127.0.0.1:8000`
-    
-    <img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
 
+    <img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
 
 3. Open Swagger UI
 Go to http://127.0.0.1:8000/docs

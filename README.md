@@ -65,7 +65,6 @@ pip install -r requirements.txt
 <img width="567" height="411" alt="Screenshot 2025-11-19 at 12 34 41" src="https://github.com/user-attachments/assets/c0c43e54-6bb4-403a-8d8e-12ab44296f7f" />
 
 The file includes:
-
    <br/>fastapi
    <br/>uvicorn
    <br/>motor
@@ -81,9 +80,9 @@ The file includes:
 Inside the backend/folder
 
 MONGO_URI=<your MongoDB Atlas connection string>
-DB_NAME=bedbuddy
-JWT_SECRET=<your generated key>
-JWT_ALGORITHM=HS256
+<br/>DB_NAME=bedbuddy
+<br/>JWT_SECRET=<your generated key>
+<br/>JWT_ALGORITHM=HS256
 
 5. Generate your own JWT secret key (OPTIONAL)
 A JWT secret key is a secure, long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025). There is an easy approach using the terminal to generate one.

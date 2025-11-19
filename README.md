@@ -1,21 +1,26 @@
 # BedBuddy: ER Bed Management System
-# Authors: BedBuddy Development Team (Fall 2025, UCCS CS 3300)
-# Last Updated: 19 November 2025
+## Authors: BedBuddy Development Team
+(Fall 2025, UCCS CS 3300)
+## Last Updated: 19 November 2025
 
-The BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability. It combines a Tkinter graphical interface created with a FastAPI backend that connects to a MongoDB Atlas cloud database. The application demonstrates secure login authentication, patient management, and bed assignment features using modular, testable components that can be expanded into a full system.
+BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability.
+It combines a Tkinter graphical interface with a FastAPI backend that connects to a MongoDB Atlas cloud database.
+The application demonstrates secure login authentication, patient management, and bed assignment features using modular,
+testable components that can be expanded into a full system.
 
 # System Requirements:
 Before running, ensure you have the following:
 1. Python 3.11 - 3.12 installed
-2. MongoDB Atlas account (for cloud Database access)
+2. MongoDB Atlas cluster & URI string
 3. A working internet connection
-4. Git 
+4. Git
 
-# Python version
+### Python Notes:
 Bedbuddy has been tested on Python 3.11 and 3.12, inside a virtual environment to avoid dependency conflicts. During testing, there were dependency conflicts with Python version 3.13 and above. Please install Python 3.11.x or Python 3.12.x for full compatibility. 
 
-# Packages used:
+### Packages Used:
 * FastAPI - backend framework (Tiangolo, 2025)
+* pymongo - MongoDB driver (MongoDB Inc., 2025)
 * Motor - async MongoDB driver (MongoDB Inc., 2025)
 * passlib[argon2] - secure password hashing (The Passlib Project, 2024)
 * Python-jose - JWT signing and verification (Davis, 2024)
@@ -24,99 +29,105 @@ Bedbuddy has been tested on Python 3.11 and 3.12, inside a virtual environment t
 * tkinter, ttk - Python's built-in GUI toolkit (Python Software Foundation, 2025)
 
 # Setup Guide (macOS & Windows)
-This guide is intended to prepare the computer to run BedBuddy locally. We use a .env file instead of hard-coding credentials to follow real-world security practices. This approach helps prevent accidental exposure and follows common software security guidelines (OWASP Foundation, 2023). 
+This guide is intended to prepare the computer to run BedBuddy locally.
+We use a .env file instead of hard-coding credentials to follow real-world security practices.
+This approach helps prevent accidental exposure and follows common software security guidelines (OWASP Foundation, 2023). 
 
-1. Clone the repository
-
-   git clone https://github.com/<your-team-repo>/bedbuddy.git
-
-   cd bedbuddy
+1. Clone the repository<br>
+`git clone https://github.com/<your-team-repo>/bedbuddy.git`
+<br>
+`cd bedbuddy`
 
 2. Create and activate a virtual environment (Recommended)
-This ensures everyone uses the same Python version and avoids dependency issues. During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above. The steps below will create a virtual environment with Python 3.12 version.
+This ensures everyone uses the same Python version and avoids dependency issues.
+During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above.
+The steps below will create a virtual environment with Python 3.12 version.
 
-## macOS
-https://www.python.org/downloads/macos/      macOS python download versions
+    ## macOS
+    https://www.python.org/downloads/macos/ | macOS Python download versions
+    
+    The first command tells Python 3.12 to create a new isolated environment named "bedbuddy".
+    You can modify the name of your virtual environment or the python version.
+    <br>
+    `python3.12 -m venv bedbuddy`
+    
+    The second command activates that environment so you can install dependencies without affecting your system.
+    <br>
+    `source bedbuddy/bin/activate`
+    
+    ## Windows (PowerShell)
+    The first command tells Python 3.12 to create a new isolated environment named "bedbuddy".
+    You can modify the name of your virtual environment or the python version. 
+    <br
+    `py -3.12 -m venv bedbuddy`
+    
+    The second command activates that environment so you can install dependencies without affecting your system.
+    <br>
+    `.\bedbuddy\Scripts\activate`
 
-The first command tells Python 3.12 to create a new isolated environment named "bedbuddy". You can modify the name of your virtual environment or the python version. 
+3. Install project dependencies
 
-   python3.12 -m venv bedbuddy
+    Ensure you are inside backend directory.
+    These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend. 
+    <br>
+    `pip install -r requirements.txt`
+    
+    <img width="567" height="411" alt="Screenshot 2025-11-19 at 12 34 41" src="https://github.com/user-attachments/assets/c0c43e54-6bb4-403a-8d8e-12ab44296f7f" />
+    
+    The file includes:
+       <br/>fastapi
+       <br/>uvicorn
+       <br/>motor
+       <br/>passlib[argon2]
+       <br/>python-jose[cryptography]
+       <br/>python-dotenv
+       <br/>requests
+       <br/>pymongo
+       <br/>argon2-cffi
 
-The second command activates that environment so you can install dependencies without affetion your system. 
+4. Create your personal .env file
 
-   source bedbuddy/bin/activate
+    Create a file titled .env in the backend folder.
+    Git should not recognize changes to it.
+    
+    MONGO_URI=<your MongoDB Atlas connection>
+    <br/>DB_NAME=bedbuddy
+    <br/>JWT_SECRET=<your generated key>
+    <br/>JWT_ALGORITHM=HS256
 
-## Windows (PowerShell)
+5. OPTIONAL: Generate your own JWT secret key
+    A JWT secret key is a secure, long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025).
+    There is an easy approach using the terminal to generate one.
+    <br>
+    `python -c "import os; print(os.urandom(24).hex())"`
+    
+    The command uses Python’s built-in os.urandom function, to generate 24 random bytes and converts them into a hexadecimal string. This approach is commonly used to generate secret keys and other security sensitive data (Python Software Foundation, 2025).
+    
+    Copy the generated key:
+    
+        Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
+    
+    Paste it into your .env file.
+    Keep your key safe and private.
 
-The first command tells Python 3.12 to create a new isolated environment named "bedbuddy". You can modify the name of your virtual environment or the python version. 
+# Running the Backend:
 
-   py -3.12 -m venv bedbuddy
+1. Open a terminal and go to the backend folder.
+<br>
+`cd backend //ensure you are in this folder`
 
-The second command activates that environment so you can install dependencies without affetion your system. 
-   
-   .\bedbuddy\Scripts\activate
+2. Start the FastAPI server.
+<br>
+`uvicorn auth_api:app --reload`
 
-3. Install project dependencies (ensure you are inside backend directory)
-
-These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
-
-pip install -r requirements.txt
-
-<img width="567" height="411" alt="Screenshot 2025-11-19 at 12 34 41" src="https://github.com/user-attachments/assets/c0c43e54-6bb4-403a-8d8e-12ab44296f7f" />
-
-The file includes:
-   <br/>fastapi
-   <br/>uvicorn
-   <br/>motor
-   <br/>passlib[argon2]
-   <br/>python-jose[cryptography]
-   <br/>python-dotenv
-   <br/>requests
-   <br/>pymongo
-   <br/>argon2-cffi
-
-4. Create your personal .env file (not committed to Git)
-
-Inside the backend/folder
-
-MONGO_URI=<your MongoDB Atlas connection string>
-<br/>DB_NAME=bedbuddy
-<br/>JWT_SECRET=<your generated key>
-<br/>JWT_ALGORITHM=HS256
-
-5. Generate your own JWT secret key (OPTIONAL)
-A JWT secret key is a secure, long, random, and private string that will be used to sign the JWT to the backend (Python Software Foundation, 2025). There is an easy approach using the terminal to generate one.
-
-python -c "import os; print(os.urandom(24).hex())"
-
-The command uses Python’s built-in os.urandom function, to generate 24 random bytes and converts them into a hexadecimal string. This approach is commonly used to generate secret keys and other security sensitive data (Python Software Foundation, 2025).
-
-   5.1	Copy the generated key, 
-
-      Example: 4f7e8b09f7a3d85e23fa0a74b3409b987dc307c3f3b7a9e8
-
-   5.2 Paste it into your .env file. The idea is to keep your key safe and private.
-
-# Running the backend:
-
-Step 1 - Open a terminal and go to the backend folder.
-
-In your terminal:
-  
-  cd backend //ensure you are in this folder
-  
-Step 2. Start the FastAPI server
-
-  uvicorn auth_api:app --reload
-
-If it starts properoly, you should see:
-
-Uvicorn running on http://127.0.0.1:8000
-
-<img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
+    You should see:
+    <br>
+    `Uvicorn running on http://127.0.0.1:8000`
+    
+    <img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
 
 
-Step 2: Open Swagger UI
+3. Open Swagger UI
 Go to http://127.0.0.1:8000/docs
 
 FastAPI automatically generates a test interface where you can try both endpoints.
@@ -188,14 +199,6 @@ This code implements:
   * hash_password() and verify_password() using Passlib Argon2
   * create_access_token() using python-jose
   * Loads keys/secrets from .env using python-dotenv
-
-
-
-<br>
-# usage
-Edit the **MONGO_URI** variable in **config/db_config.py**<br>
-with your real MongoDB URI.
-
 
 # References:
 

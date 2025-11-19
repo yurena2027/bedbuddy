@@ -66,15 +66,15 @@ pip install -r requirements.txt
 
 The file includes:
 
-   fastapi
-   uvicorn
-   motor
-   passlib[argon2]
-   python-jose[cryptography]
-   python-dotenv
-   requests
-   pymongo
-   argon2-cffi
+   <br/>fastapi
+   <br/>uvicorn
+   <br/>motor
+   <br/>passlib[argon2]
+   <br/>python-jose[cryptography]
+   <br/>python-dotenv
+   <br/>requests
+   <br/>pymongo
+   <br/>argon2-cffi
 
 4. Create your personal .env file (not committed to Git)
 

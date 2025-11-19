@@ -39,9 +39,10 @@ This approach helps prevent accidental exposure and follows common software secu
 `cd bedbuddy`
 
 2. Create and activate a virtual environment (Recommended)
-This ensures everyone uses the same Python version and avoids dependency issues.
-During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above.
-The steps below will create a virtual environment with Python 3.12 version.
+
+    This ensures everyone uses the same Python version and avoids dependency issues.
+    During testing, there were version conflicts with FastAPI, Motor, and Argon2 using Python version 3.13 and above.
+    The steps below will create a virtual environment with Python 3.12 version.
 
     ## macOS
     https://www.python.org/downloads/macos/ | macOS Python download versions

@@ -1,6 +1,6 @@
 # BedBuddy: ER Bed Management System
 # Authors: BedBuddy Development Team (Fall 2025, UCCS CS 3300)
-# Last Updated: 17 November 2025
+# Last Updated: 19 November 2025
 
 The BedBuddy is a prototype desktop application built for emergency room settings to help track patients and bed availability. It combines a Tkinter graphical interface created with a FastAPI backend that connects to a MongoDB Atlas cloud database. The application demonstrates secure login authentication, patient management, and bed assignment features using modular, testable components that can be expanded into a full system.
 
@@ -61,6 +61,8 @@ The second command activates that environment so you can install dependencies wi
 These dependencies support the backend, password hashing, JWT token creation, environment variable, and the communication between the UI and the backend.
 
 pip install -r requirements.txt
+
+<img width="567" height="411" alt="Screenshot 2025-11-19 at 12 34 41" src="https://github.com/user-attachments/assets/c0c43e54-6bb4-403a-8d8e-12ab44296f7f" />
 
 The file includes:
 

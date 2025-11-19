@@ -33,7 +33,8 @@ This guide is intended to prepare the computer to run BedBuddy locally.
 We use a .env file instead of hard-coding credentials to follow real-world security practices.
 This approach helps prevent accidental exposure and follows common software security guidelines (OWASP Foundation, 2023). 
 
-1. Clone the repository<br>
+1. Clone the repository
+<br>
 `git clone https://github.com/<your-team-repo>/bedbuddy.git`
 <br>
 `cd bedbuddy`

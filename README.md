@@ -59,8 +59,7 @@ This approach helps prevent accidental exposure and follows common software secu
     
     ## Windows (PowerShell)
     The first command tells Python 3.12 to create a new isolated environment named "bedbuddy".
-    You can modify the name of your virtual environment or the python version. 
-    <br
+    You can modify the name of your virtual environment or the python version.
     `py -3.12 -m venv bedbuddy`
     
     The second command activates that environment so you can install dependencies without affecting your system.
@@ -115,10 +114,10 @@ This approach helps prevent accidental exposure and follows common software secu
 # Running the Backend:
 
 1. Open a terminal and go to the backend folder.
-<br>
-`cd backend //ensure you are in this folder`
 
-2. Start the FastAPI server.
+    `cd backend //ensure you are in this folder`
+
+3. Start the FastAPI server.
 
     `uvicorn auth_api:app --reload`
 
@@ -127,7 +126,7 @@ This approach helps prevent accidental exposure and follows common software secu
 
     <img width="564" height="172" alt="Screenshot 2025-11-08 at 19 35 39" src="https://github.com/user-attachments/assets/9e8bae7c-f7d2-4bed-8ba2-76b8940c6238" />
 
-3. Open Swagger UI
+4. Open Swagger UI
 Go to http://127.0.0.1:8000/docs
 
 FastAPI automatically generates a test interface where you can try both endpoints.
@@ -140,15 +139,13 @@ From here, you can test:
 
 <img width="186" height="105" alt="image" src="https://github.com/user-attachments/assets/4760b786-599a-45f0-acf3-6b734d69b190" />
 
-  
   /auth/login            Log in existing user     Returns 200 ok and a JWT token
-
+  
 <img width="203" height="109" alt="image" src="https://github.com/user-attachments/assets/351a1970-ddef-419b-8add-2a1022ebe8e2" />
 
   /auth/login            Invalid credentials      Returns 401 Unauthorized with "Failed Login"
 
 <img width="170" height="161" alt="image" src="https://github.com/user-attachments/assets/ce61002d-a659-467c-a37e-8afcaf4d7ed7" />
-
 
 # Running the Tkinter Login App
 

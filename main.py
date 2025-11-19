@@ -25,11 +25,9 @@
 # - Sommerville, I. (2016). Software Engineering (10th ed.). Pearson Education.
 # ====================================================================================
 
+from ui.LoginApp import Login
 
-from ui.bedbuddy_ui import BedBuddy
-
+# Entry point: run Login GUI
 if __name__ == "__main__":
-
-    app = BedBuddy()
-    app.run()
+    Login().mainloop()
 
